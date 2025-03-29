@@ -6,7 +6,7 @@ export async function generateUniqueNumber(category: string): Promise<string> {
   const year = now.getFullYear() % 100;
 
   // Check if a record exists for this category, year, and month
-  let record = await prisma.tracker.findFirst({
+  const record = await prisma.tracker.findFirst({
     where: { category, year },
   });
 

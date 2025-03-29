@@ -1,6 +1,5 @@
 import { fetchCustomers } from '@/app/lib/data';
 import Pagination from './pagination';
-import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from 'react';
 import { DeleteCustomer, UpdateCustomer } from './buttons';
 
 export default async function CustomersTable({

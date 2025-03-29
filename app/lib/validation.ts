@@ -7,7 +7,7 @@ export const customerFormValidation = z.object({
 	race: z.string().optional(),
 	gender: z.string().optional(),
 	marital_status: z.string().optional(),
-	no_of_child: z.string().optional(),
+	no_of_child: z.number().optional(),
 	car_plate: z.string().optional(),
 	mobile_no: z.string().optional(),
 	status: z.string().optional(),

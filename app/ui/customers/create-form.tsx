@@ -6,7 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Button } from '../button';
 import { createCustomer, updateCustomer, fetchUniqueNumber } from '@/app/lib/actions';
 import Link from 'next/link';
-import { CustomerField } from '@/app/lib/definitions';
+// import { CustomerField } from '@/app/lib/definitions';
 import { customerFormValidation, transformError } from '@/app/lib/validation';
 
 
@@ -37,7 +37,7 @@ type FormData = {
   race: string;
   gender: string;
   marital_status: string;
-  no_of_child: string;
+  no_of_child: number;
   car_plate: string;
   mobile_no: string;
   status: string;
@@ -96,7 +96,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
     race: customers?.race || '',
     gender: customers?.gender || '',
     marital_status: customers?.marital_status || '',
-    no_of_child: customers?.no_of_child?.toString() || '',
+    no_of_child: customers?.no_of_child || '',
     car_plate: customers?.car_plate || '',
     mobile_no: customers?.mobile_no || '',
     status: customers?.status || '',
