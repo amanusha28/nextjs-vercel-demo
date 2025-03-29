@@ -33,23 +33,38 @@ export async function generateUniqueNumber(category: string): Promise<string> {
 }
 
 export async function fetchCustomers(payload: { 
-  query: any; currentPage: any; 
+  query: any; currentPage: number; pageSize: number; 
 }) {
-  const { query, currentPage } = payload;
+  const { query, currentPage, pageSize } = payload;
   try {
+    console.log('Fetching customers with query:', query);
+    const skip = (currentPage - 1) * pageSize;
+
     const customers = await prisma.customer.findMany({
       where: {
         deleted_at: null,
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { ic: { contains: query, mode: 'insensitive' } },
+          { passport: { contains: query, mode: 'insensitive' } },
+        ]
       },
+      skip,
+      take: pageSize,
     });
 
     const totalCustomer = await prisma.customer.count({
       where: {
-        deleted_at: null
-      }
+        deleted_at: null,
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { ic: { contains: query, mode: 'insensitive' } },
+          { passport: { contains: query, mode: 'insensitive' } },
+        ]
+      },
     });
 
-    return { totalCustomer, customers};
+    return { totalCustomer, customers };
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all customers.');

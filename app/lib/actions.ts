@@ -7,6 +7,11 @@ import { customerFormValidation } from "./validation";
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+export async function fetchUniqueNumber(category: string) {
+	const generate_rId = await generateUniqueNumber(category);
+	return generate_rId;
+}
+
 
 async function updatedCustomerRelations(relations: any) {
 	return await Promise.all(relations.map(async (relation: any) => {
@@ -78,14 +83,20 @@ export async function transformPayload(formData: any) {
 		console.log('formData.bank_details ============= ', temp);
 	}
 
-	if (formData.remarks.length > 0) {
+	if (formData.remarks?.length > 0) {
 		const temp = await updatedCustomerRemark(formData.remarks);
 		formData.remarks = temp;
 		console.log('formData.remarks ============= ', temp);
 	}
 
+	if (!formData.generate_id) {
+		const generate_id = await fetchUniqueNumber('CT');
+		formData.generate_id = generate_id;
+	}
+
 	const customerData = {
 		name: formData.name,
+		generate_id: formData.generate_id,
 		ic: formData.ic,
 		passport: formData.passport,
 		race: formData.race,
@@ -108,7 +119,7 @@ export async function transformPayload(formData: any) {
 
 export async function createCustomer(formData: any) {
 	const customerData = await transformPayload(formData);
-
+	
 	try {
 		const customer = await prisma.customer.create({
 			data: customerData,
@@ -135,6 +146,17 @@ export async function updateCustomer(id: string, formData: any) {
 	revalidatePath('/dashboard/customers');
 	redirect('/dashboard/customers');
 
+}
+
+export async function deleteCustomer(id: string) {
+	console.log('id ============= deleteCustomer ', id);
+	await prisma.customer.update({
+		data: { deleted_at: new Date() },
+		where: { id },
+	});
+	console.log('Customer Successfully Deleted');
+	revalidatePath('/dashboard/customers');
+	// redirect('/dashboard/customers');
 }
 
 

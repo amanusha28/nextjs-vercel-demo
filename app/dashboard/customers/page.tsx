@@ -25,7 +25,7 @@ export default async function Page(props: {
         <CreateCustomer />
       </div>
        <Suspense key={query + currentPage} fallback={<CustomerTableSkeleton />}>
-        <Table query={query} currentPage={currentPage} />
+        <Table query={query} currentPage={currentPage}/>
       </Suspense>
     </div>
   );

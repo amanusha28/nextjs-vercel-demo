@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Button } from '../button';
-import { createCustomer, updateCustomer } from '@/app/lib/actions';
+import { createCustomer, updateCustomer, fetchUniqueNumber } from '@/app/lib/actions';
 import Link from 'next/link';
 import { CustomerField } from '@/app/lib/definitions';
 import { customerFormValidation, transformError } from '@/app/lib/validation';
@@ -182,13 +182,14 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
     console.log('Submitter Button ID:', submitter?.id);
 
     // Handle the Customer Relations (Family & Guarantor) form
+    const crId =await fetchUniqueNumber('CR');
     if (submitter?.id === "addGuaranter") {
       await setFormData((prev) => ({
         ...prev,
         relations: [
           ...(Array.isArray(prev.relations) ? prev.relations : []),
           {
-            id: 'temp-id',
+            id: crId,
             guarantor_ic: prev.guarantor_ic,
             guarantor_name: prev.guarantor_name,
             guarantor_contact_number: prev.guarantor_contact_number,
@@ -207,13 +208,14 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
     }
 
     // Handle the Bank Details form
+    const cbId =await fetchUniqueNumber('CB');
     if (submitter?.id === "addBankDetails") {
       await setFormData((prev) => ({
         ...prev,
         bank_details: [
           ...(Array.isArray(prev.bank_details) ? prev.bank_details : []),
           {
-            id: 'temp-id',
+            id: cbId,
             bank_name: prev.bank_name,
             bank_account_no: prev.bank_account_no,
             bank_account_holder: prev.bank_account_holder,
@@ -253,6 +255,52 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
       console.log('result ============= ', result);
     }
   };
+
+
+  const handleDeleteGuarantor = (id: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      relations: prev.relations.filter((relation) => relation.id !== id),
+    }));
+  };
+
+  const handleEditGuarantor = (id: any) => {
+    const guarantor = formData.relations.find((relation) => relation.id === id);
+    if (guarantor) {
+      setFormData((prev) => ({
+        ...prev,
+        guarantor_name: guarantor.guarantor_name,
+        guarantor_ic: guarantor.guarantor_ic,
+        guarantor_contact_number: guarantor.guarantor_contact_number,
+        guarantor_relationship: guarantor.guarantor_relationship,
+        relations: prev.relations.filter((relation) => relation.id !== id),
+      }));
+    }
+  };
+
+  const handleDeleteBank = (id: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      bank_details: prev.bank_details.filter((bank) => bank.id !== id),
+    }));
+  };
+
+  const handleEditBank = (id: any) => {
+    const bank_details = formData.bank_details.find((bank) => bank.id === id);
+    if (bank_details) {
+      setFormData((prev) => ({
+        ...prev,
+        bank_name: bank_details.bank_name,
+        bank_account_no: bank_details.bank_account_no,
+        bank_account_holder: bank_details.bank_account_holder,
+        bank_card_no: bank_details.bank_card_no,
+        bank_card_pin: bank_details.bank_card_pin,
+        bank_remark: bank_details.bank_remark,
+        bank_details: prev.bank_details.filter((bank) => bank.id !== id),
+      }));
+    }
+  };
+
 
   return (
     <div>
@@ -971,6 +1019,10 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
                               <th scope="col" className="px-3 py-5 font-mediums">
                                 Relationship
                               </th>
+                              <th scope="col" className="px-3 py-5 font-mediums">
+                                Action
+                              </th>
+
                             </tr>
                           </thead>
 
@@ -998,6 +1050,13 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
                                 <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                                   <div className="flex items-center gap-3">
                                     <p>{gua.guarantor_relationship}</p>
+                                  </div>
+                                </td>
+
+                                <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                                  <div className="flex items-center gap-3">
+                                  <button className="mr-2 text-blue-500" onClick={() => handleEditGuarantor(gua.id)}>Edit</button>
+                                  <button className="text-red-500" onClick={() => handleDeleteGuarantor(gua.id)}>Delete</button>
                                   </div>
                                 </td>
 
@@ -1141,6 +1200,9 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
                             <th scope="col" className="px-3 py-5 font-mediums">
                               Remark
                             </th>
+                            <th scope="col" className="px-3 py-5 font-mediums">
+                              Action
+                            </th>
                             
                           </tr>
                         </thead>
@@ -1179,6 +1241,14 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
                                   <p>{bank.bank_remark}</p>
                                 </div>
                               </td>
+
+                              <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                                <div className="flex items-center gap-3">
+                                  <button className="mr-2 text-blue-500" onClick={() => handleEditBank(bank.id)}>Edit</button>
+                                  <button className="text-red-500" onClick={() => handleDeleteBank(bank.id)}>Delete</button>
+                                 </div>
+                              </td>
+
                             </tr>
                           ))}
                         </tbody>
