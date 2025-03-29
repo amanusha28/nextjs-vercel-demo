@@ -66,7 +66,7 @@ type FormData = {
 
 };
 
-export default function CustomerForm({ customers }: { customers?: CustomerField | null }) {
+export default function CustomerForm({ customers }: { customers?: any | null }) {
   console.log('customers ============= ', customers);
 
   const [errors, setErrors] = useState<Record<any,any>>({}); // Initialize errors state
@@ -114,7 +114,7 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
       employment_remarks: customers?.employment?.employment_remarks || '',
     },
     
-    relations: customers?.relations?.map((relation) => ({
+    relations: customers?.relations?.map((relation: { id?: any; guarantor_name: string; guarantor_ic: string; guarantor_contact_number: string; guarantor_relationship: string; }) => ({
       id: relation.id || null,
       guarantor_name: relation.guarantor_name || '',
       guarantor_ic: relation.guarantor_ic || '',
@@ -123,7 +123,7 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
     })) || [],
     
 
-    bank_details: customers?.bank_details?.map((bank) => ({
+    bank_details: customers?.bank_details?.map((bank: { id?: any; bank_name: string; bank_account_no: string; bank_account_holder: string; bank_card_no: string; bank_card_pin: string; bank_remark: string; }) => ({
       id: bank.id || null,
       bank_name: bank.bank_name || '',
       bank_account_no: bank.bank_account_no || '',
