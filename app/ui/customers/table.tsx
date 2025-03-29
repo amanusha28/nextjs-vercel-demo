@@ -8,6 +8,7 @@ import {
 import { fetchCustomers } from '@/app/lib/data';
 import Pagination from './pagination';
 import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from 'react';
+import { DeleteCustomer, UpdateCustomer } from './buttons';
 
 export default async function CustomersTable({
   query,
@@ -43,6 +44,9 @@ export default async function CustomersTable({
                     <th scope="col" className="px-3 py-5 font-mediums">
                       Passport
                     </th>
+                    <th scope="col" className="px-3 py-5 font-mediums">
+                      ...
+                    </th>
                   </tr>
                 </thead>
 
@@ -71,6 +75,13 @@ export default async function CustomersTable({
                         <div className="flex items-center gap-3">
                           <p>{customer.passport}</p>
                         </div>
+                      </td>
+
+                      <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                      <div className="flex items-center gap-3">
+                        <UpdateCustomer id={customer.id} />
+                        <DeleteCustomer id={customer.id} />
+                      </div>
                       </td>
                       
                     </tr>

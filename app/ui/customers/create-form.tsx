@@ -51,8 +51,8 @@ type FormData = {
   remarks: Record<string, any>;
 };
 
-export default function CustomerForm({ customers }: { customers: CustomerField[] }) {
-  const guarantor:any = [];
+export default function CustomerForm({ customers }: { customers?: CustomerField | null }) {
+  console.log('customers ============= ', customers);
 
   const [errors, setErrors] = useState<Record<any,any>>({}); // Initialize errors state
   
@@ -65,24 +65,25 @@ export default function CustomerForm({ customers }: { customers: CustomerField[]
 
   const [formData, setFormData] = useState<FormData>({
     basicInfo: {
-      name: '',
-      ic: '',
-      passport: '',
-      race: '',
-      gender: '',
-      marital_status: '',
-      no_of_child: '',
-      car_plate: '',
-      mobile_no: '',
-      status: '',
+      name: customers?.basicInfo?.name || '',
+      ic: customers?.basicInfo?.ic || '',
+      passport: customers?.basicInfo?.passport || '',
+      race: customers?.basicInfo?.race || '',
+      gender: customers?.basicInfo?.gender || '',
+      marital_status: customers?.basicInfo?.marital_status || '',
+      no_of_child: customers?.basicInfo?.no_of_child?.toString() || '',
+      car_plate: customers?.basicInfo?.car_plate || '',
+      mobile_no: customers?.basicInfo?.mobile_no || '',
+      status: customers?.basicInfo?.status || '',
     },
-    customer_address: {},
-    employment: {},
-    relations: {},
-    bank_details: {},
-    documents: {},
-    remarks: {},
+    customer_address: customers?.customer_address || {},
+    employment: customers?.employment || {},
+    relations: customers?.relations || {},
+    bank_details: customers?.bank_details || {},
+    documents: customers?.documents || {},
+    remarks: customers?.remarks || {},
   });
+  console.log('========= formData ============= ', formData);
 
   // Handle input changes dynamically based on active tab
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>) => {
@@ -842,7 +843,7 @@ export default function CustomerForm({ customers }: { customers: CustomerField[]
                         </thead>
 
                         <tbody className="divide-y divide-gray-200 text-gray-900">
-                          {guarantor.map((gua: { id: any; name: string; ic: string; contact_number: string; relationship: string; }) => (
+                          {customers?.relations?.map((gua: { id: any; name: string; ic: string; contact_number: string; relationship: string; }) => (
                             <tr key={gua.id} className="group">
                               <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                                 <div className="flex items-center gap-3">
