@@ -74,8 +74,8 @@ export type CustomerField = {
   tel_no: string | null;
   customer_address?: Record<string, any>; 
   employment?: Record<string, any>; 
-  relations?: Record<string, any>; 
-  bank_details?: Record<string, any>; 
-  documents?: Record<string, any>; 
-  remarks?: Record<string, any>; 
+  relations?: Record<string, any>[]; 
+  bank_details?: Record<string, any>[]; 
+  documents?: Record<string, any>[]; 
+  // remarks?: Record<string, any>[]; 
 };

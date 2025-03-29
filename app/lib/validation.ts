@@ -13,10 +13,10 @@ export const customerFormValidation = z.object({
 	status: z.string().optional(),
 	customer_address: z.object({}).optional(),
 	employment: z.object({}).optional(),
-	relations: z.object({}).optional(),
-	bank_details: z.object({}).optional(),
-	documents: z.object({}).optional(),
-	remarks: z.object({}).optional(),
+	relations: z.array(z.object({})).optional(),
+	bank_details: z.array(z.object({})).optional(),
+	documents: z.array(z.object({})).optional(),
+	remarks: z.array(z.object({})).optional(),
 });
 
 

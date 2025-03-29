@@ -19,7 +19,6 @@ export default async function CustomersTable({
 }) {
   const payload = { query, currentPage }
   const { totalCustomer, customers } = await fetchCustomers(payload);
-  console.log(customers)
   return (
     <div className="w-full">
       <div className="mt-6 flow-root">

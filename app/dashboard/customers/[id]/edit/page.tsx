@@ -20,7 +20,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 					},
 				]}
 			/>
-		<CustomerForm customers={customers} />
+			<CustomerForm customers={customers} />
 		</main>
 	);
 }

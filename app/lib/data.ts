@@ -32,19 +32,6 @@ export async function generateUniqueNumber(category: string): Promise<string> {
   return `${category.toUpperCase()}${year}${formattedNumber}`;
 }
 
-
-// interface FetchCustomersPayload {
-//   query: string;
-//   currentPage: number;
-// }
-
-// interface Customer {
-//   id: string;
-//   name: string | null;
-//   email: string | null;
-// }
-
-
 export async function fetchCustomers(payload: { 
   query: any; currentPage: any; 
 }) {
@@ -76,7 +63,6 @@ export async function fetchCustomerById(id: string) {
     });
 
     return customer;
-    // return transformCustomerData(customer);
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch the customer.');
