@@ -45,18 +45,16 @@ export async function generateUniqueNumber(category: string): Promise<string> {
 // }
 
 interface TransformCustomerDto {
-  basicInfo: {
-    name: string;
-    ic: string;
-    passport: string;
-    race: string;
-    gender: string;
-    marital_status: string;
-    no_of_child: string | null;
-    car_plate: string;
-    mobile_no: string;
-    status: string;
-  };
+  name: string;
+  ic: string;
+  passport: string;
+  race: string;
+  gender: string;
+  marital_status: string;
+  no_of_child: string | null;
+  car_plate: string;
+  mobile_no: string;
+  status: string;
   customer_address: Record<string, any>;
   employment: Record<string, any>;
   relations: Record<string, any>;
