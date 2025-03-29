@@ -31,18 +31,16 @@ const tabs: Set<TabObject> = new Set([
 
 // Define the form data type
 type FormData = {
-  basicInfo: {
-    name: string;
-    ic: string;
-    passport: string;
-    race: string;
-    gender: string;
-    marital_status: string;
-    no_of_child: string;
-    car_plate: string;
-    mobile_no: string;
-    status: string;
-  };
+  name: string;
+  ic: string;
+  passport: string;
+  race: string;
+  gender: string;
+  marital_status: string;
+  no_of_child: string;
+  car_plate: string;
+  mobile_no: string;
+  status: string;
   customer_address: Record<string, any>;
   employment: Record<string, any>;
   relations: Record<string, any>;
@@ -64,18 +62,16 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
-    basicInfo: {
-      name: customers?.basicInfo?.name || '',
-      ic: customers?.basicInfo?.ic || '',
-      passport: customers?.basicInfo?.passport || '',
-      race: customers?.basicInfo?.race || '',
-      gender: customers?.basicInfo?.gender || '',
-      marital_status: customers?.basicInfo?.marital_status || '',
-      no_of_child: customers?.basicInfo?.no_of_child?.toString() || '',
-      car_plate: customers?.basicInfo?.car_plate || '',
-      mobile_no: customers?.basicInfo?.mobile_no || '',
-      status: customers?.basicInfo?.status || '',
-    },
+    name: customers?.name || '',
+    ic: customers?.ic || '',
+    passport: customers?.passport || '',
+    race: customers?.race || '',
+    gender: customers?.gender || '',
+    marital_status: customers?.marital_status || '',
+    no_of_child: customers?.no_of_child?.toString() || '',
+    car_plate: customers?.car_plate || '',
+    mobile_no: customers?.mobile_no || '',
+    status: customers?.status || '',
     customer_address: customers?.customer_address || {},
     employment: customers?.employment || {},
     relations: customers?.relations || {},
@@ -101,10 +97,10 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // console.log('Submitted Data:', formData);
+    console.log('Submitted Data:', formData);
 
     const validationResult = customerFormValidation.safeParse(formData);
-    // console.log('validationResult ============= ', validationResult);
+    console.log('validationResult ============= ', validationResult);
     if (!validationResult.success) {
       setErrors(transformError(validationResult));
       return;
@@ -130,23 +126,20 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
               name="name"
               type="text"
               placeholder="Enter name"
-              value={formData.basicInfo?.name || ''}
+              value={formData?.name || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               className={`block w-full rounded-md border ${
-                errors.basicInfo?.name ? 'border-red-500' : 'border-gray-200'
+                errors?.name ? 'border-red-500' : 'border-gray-200'
               } py-2 px-3 text-sm outline-2 placeholder:text-gray-500`}
               
             />
-            {errors.basicInfo?.name?.[0] && (
-              <p className="text-red-500 text-xs mt-1">{errors.basicInfo.name[0]}</p>
+            {errors?.name?.[0] && (
+              <p className="text-red-500 text-xs mt-1">{errors.name[0]}</p>
             )}
 
 
@@ -162,22 +155,19 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
               name="ic"
               type="text"
               placeholder="Enter IC number"
-              value={formData.basicInfo?.ic || ''}
+              value={formData?.ic || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               className={`block w-full rounded-md border ${
-                errors.basicInfo?.ic ? 'border-red-500' : 'border-gray-200'
+                errors?.ic ? 'border-red-500' : 'border-gray-200'
               } py-2 px-3 text-sm outline-2 placeholder:text-gray-500`}
             />
-            {errors.basicInfo?.ic?.[0] && (
-              <p className="text-red-500 text-xs mt-1">{errors.basicInfo.ic[0]}</p>
+            {errors?.ic?.[0] && (
+              <p className="text-red-500 text-xs mt-1">{errors.ic[0]}</p>
             )}
           </div>
 
@@ -191,22 +181,19 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
               name="passport"
               type="text"
               placeholder="Enter passport number"
-              value={formData.basicInfo?.passport || ''}
+              value={formData?.passport || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               className={`block w-full rounded-md border ${
-                errors.basicInfo?.passport ? 'border-red-500' : 'border-gray-200'
+                errors?.passport ? 'border-red-500' : 'border-gray-200'
               } py-2 px-3 text-sm outline-2 placeholder:text-gray-500`}
             />
-            {errors.basicInfo?.passport?.[0] && (
-              <p className="text-red-500 text-xs mt-1">{errors.basicInfo.passport[0]}</p>
+            {errors?.passport?.[0] && (
+              <p className="text-red-500 text-xs mt-1">{errors.passport[0]}</p>
             )}
           </div>
 
@@ -220,14 +207,11 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
               name="race"
               type="text"
               placeholder="Enter race"
-              value={formData.basicInfo?.race || ''}
+              value={formData?.race || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
@@ -242,14 +226,11 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
             <select
               id="gender"
               name="gender"
-              value={formData.basicInfo?.gender || ''}
+              value={formData?.gender || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
@@ -269,14 +250,11 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
             <select
               id="marital_status"
               name="marital_status"
-              value={formData.basicInfo?.marital_status || ''}
+              value={formData?.marital_status || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
@@ -298,14 +276,11 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
               id="no_of_child"
               name="no_of_child"
               type="number"
-              value={formData.basicInfo?.no_of_child || ''}
+              value={formData?.no_of_child || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               placeholder="Enter number of children"
@@ -322,14 +297,11 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
               id="car_plate"
               name="car_plate"
               type="text"
-              value={formData.basicInfo?.car_plate || ''}
+              value={formData?.car_plate || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               placeholder="Enter car plate number"
@@ -346,14 +318,11 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
               id="mobile_no"
               name="mobile_no"
               type="tel"
-              value={formData.basicInfo?.mobile_no || ''}
+              value={formData?.mobile_no || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               placeholder="Enter contact number"
@@ -369,14 +338,11 @@ export default function CustomerForm({ customers }: { customers?: CustomerField 
             <select
               id="status"
               name="status"
-              value={formData.basicInfo?.status || ''}
+              value={formData?.status || ''}
               onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
-                  basicInfo: {
-                    ...prev.basicInfo,
-                    [e.target.name]: e.target.value || '', // Ensure controlled behavior
-                  },
+                  [e.target.name]: e.target.value || '', // Ensure controlled behavior
                 }));
               }}
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"

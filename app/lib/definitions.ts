@@ -59,18 +59,16 @@ export type FormattedCustomersTable = {
 
 export type CustomerField = {
   id: string;
-  basicInfo: {
-    name: string | null;
-    ic: string | null;
-    passport: string | null;
-    race: string | null;
-    gender: string | null;
-    marital_status: string | null;
-    no_of_child: number | null;
-    car_plate: string | null;
-    mobile_no: string | null;
-    status: string | null;
-  };
+  name: string | null;
+  ic: string | null;
+  passport: string | null;
+  race: string | null;
+  gender: string | null;
+  marital_status: string | null;
+  no_of_child: number | null;
+  car_plate: string | null;
+  mobile_no: string | null;
+  status: string | null;
   generate_id: string | null;
   tel_code: string | null;
   tel_no: string | null;

@@ -120,7 +120,8 @@ export async function fetchCustomerById(id: string) {
       where: { id },
     });
 
-    return transformCustomerData(customer);
+    return customer;
+    // return transformCustomerData(customer);
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch the customer.');
