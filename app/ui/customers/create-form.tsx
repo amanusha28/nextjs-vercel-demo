@@ -7,7 +7,7 @@ import { Button } from '../button';
 import { createCustomer } from '@/app/lib/actions';
 import Link from 'next/link';
 import { CustomerField } from '@/app/lib/definitions';
-import { useFormState } from 'react-dom';
+import { customerFormValidation, transformError } from '@/app/lib/validation';
 
 
 // Define the tab type
@@ -54,6 +54,8 @@ type FormData = {
 export default function CustomerForm({ customers }: { customers: CustomerField[] }) {
   const guarantor:any = [];
 
+  const [errors, setErrors] = useState<Record<any,any>>({}); // Initialize errors state
+  
   // Initialize activeTab with the key of the first tab
   const initialTab = tabs.values().next().value?.key;
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab || 'customer_address');
@@ -98,9 +100,18 @@ export default function CustomerForm({ customers }: { customers: CustomerField[]
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitted Data:', formData);
+    // console.log('Submitted Data:', formData);
 
-    await createCustomer(formData); // Replace with your API call logic
+    const validationResult = customerFormValidation.safeParse(formData);
+    // console.log('validationResult ============= ', validationResult);
+    if (!validationResult.success) {
+      setErrors(transformError(validationResult));
+      return;
+    }
+    setErrors({}); // Clear previous errors if validation passes
+
+    const result = await createCustomer(formData);
+    console.log('result ============= ', result);
   };
 
   return (
@@ -128,8 +139,16 @@ export default function CustomerForm({ customers }: { customers: CustomerField[]
                   },
                 }));
               }}
-              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+              className={`block w-full rounded-md border ${
+                errors.basicInfo?.name ? 'border-red-500' : 'border-gray-200'
+              } py-2 px-3 text-sm outline-2 placeholder:text-gray-500`}
+              
             />
+            {errors.basicInfo?.name?.[0] && (
+              <p className="text-red-500 text-xs mt-1">{errors.basicInfo.name[0]}</p>
+            )}
+
+
           </div>
 
           {/* IC (Identity Card) */}
@@ -152,8 +171,13 @@ export default function CustomerForm({ customers }: { customers: CustomerField[]
                   },
                 }));
               }}
-              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+              className={`block w-full rounded-md border ${
+                errors.basicInfo?.ic ? 'border-red-500' : 'border-gray-200'
+              } py-2 px-3 text-sm outline-2 placeholder:text-gray-500`}
             />
+            {errors.basicInfo?.ic?.[0] && (
+              <p className="text-red-500 text-xs mt-1">{errors.basicInfo.ic[0]}</p>
+            )}
           </div>
 
           {/* Passport */}
@@ -176,8 +200,13 @@ export default function CustomerForm({ customers }: { customers: CustomerField[]
                   },
                 }));
               }}
-              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+              className={`block w-full rounded-md border ${
+                errors.basicInfo?.passport ? 'border-red-500' : 'border-gray-200'
+              } py-2 px-3 text-sm outline-2 placeholder:text-gray-500`}
             />
+            {errors.basicInfo?.passport?.[0] && (
+              <p className="text-red-500 text-xs mt-1">{errors.basicInfo.passport[0]}</p>
+            )}
           </div>
 
           {/* Race */}

@@ -3,9 +3,18 @@ import { z } from 'zod';
 import { PrismaClient } from "@prisma/client";
 import { generateUniqueNumber } from "./data";
 const prisma = new PrismaClient();
+import { customerFormValidation } from "./validation";
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export async function createCustomer(formData: any) {
     console.log('formData ============= ', formData);
+
+		const parsedData = customerFormValidation.safeParse(formData);
+
+		if (!parsedData.success) {
+			return { error: parsedData.error.format() }; // Return errors
+		}
     const generate_id = await generateUniqueNumber('CT');
     console.log('generate_id ============= ', generate_id);
     const customerData = {
@@ -32,7 +41,8 @@ export async function createCustomer(formData: any) {
             data: customerData,
         });
         console.log('Customer created successfully:', customer);
-        return customer;
+        revalidatePath('/dashboard/customers');
+				redirect('/dashboard/customers');
     } catch (error) {
         console.error('Error creating customer:', error);
         throw error;
