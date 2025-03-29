@@ -13,14 +13,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model tracker {
+  id         String @id(map: "tracker_pk") @default(uuid()) @db.Uuid
+  category   String // 'loan', 'customer', 'user', etc.
+  year       Int    // Year of tracking
+  lastNumber Int    // Last used running number for the given category, year, and month
+  @@unique([category, year]) // Ensure one record per category, year, and month
+}
+
 model customer {
   id               String     @id(map: "customer_pk") @default(uuid()) @db.Uuid
-  email            String?    @db.VarChar(255)
   generate_id      String?    @db.VarChar
-  gender           String?    @db.VarChar(255)
-  ic               String?    @db.VarChar(255) @unique
   name             String?    @db.VarChar(255)
+  ic               String?    @db.VarChar(255) @unique
   passport         String?    @db.VarChar(255) @unique
+  gender           String?    @db.VarChar(255)
   race             String?    @db.VarChar(255)
   deleted_at       DateTime?
   bank_details     Json?

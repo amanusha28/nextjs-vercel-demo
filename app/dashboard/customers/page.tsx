@@ -1,4 +1,3 @@
-import Pagination from '@/app/ui/customers/pagination';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/customers/table';
 import { CreateCustomer } from '@/app/ui/customers/buttons';
@@ -29,9 +28,6 @@ export default async function Page(props: {
        <Suspense key={query + currentPage} fallback={<CustomerTableSkeleton />}>
         <Table query={query} currentPage={currentPage} />
       </Suspense>
-      <div className="mt-5 flex w-full justify-center">
-        {/* <Pagination totalPages={totalPages} /> */}
-      </div>
     </div>
   );
 }
