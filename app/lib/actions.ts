@@ -132,7 +132,7 @@ export async function transformPayload(formData: CustomerFormData) {
 		const generate_id = await fetchUniqueNumber('CT');
 		formData.generate_id = generate_id;
 	}
-	
+
 	if (formData.document?.length === 0) {
 		delete formData.document;
 	}
@@ -169,11 +169,11 @@ export async function createCustomer(formData: CustomerFormData) {
 	const customerData = await transformPayload(formData);
 
 	const session = await auth()
-  	console.log(session)
+	console.log(session)
 
 	try {
 		const customer = await prisma.customer.create({
-			data: {...customerData, created_by: session?.user.id},
+			data: { ...customerData, created_by: session?.user.id },
 		});
 		console.log('Customer created successfully:', customer);
 		revalidatePath('/dashboard/customers');
@@ -226,8 +226,8 @@ export async function deleteCustomer(id: string) {
 export async function checkUniqueConstraint(col: string, val: string) {
 	return prisma.customer.findFirst({
 		where: {
-		  [col]: val,
+			[col]: val,
 		},
-	  });
+	});
 }
 
