@@ -17,7 +17,7 @@ async function getUser(email: string): Promise<CustomUser | undefined> {
         deleted_at: null
       }
     });
-    console.log( 'getUser getUser getUser getUser', user)
+    // console.log( 'getUser getUser getUser getUser', user)
     return user || undefined;
   } catch (error) {
     console.error('Failed to fetch user:', error);
@@ -70,28 +70,5 @@ export const { auth, signIn, signOut } = NextAuth({
       return null;
     },
   })],
-  callbacks: {
-    session({ session, token }) {
-      if (token) {
-        session.user = {
-          ...session.user,
-          id: token.id as string,
-          role: token.role as string,
-          generate_id: token.generate_id as string,
-          supervisor: token.supervisor as string,
-        };
-      }
-      console.log('session session session session', session)
-      return session;
-    },
-    jwt({ token, user }) {
-      if (user) {
-        token = { ...token, ...user };
-      }
-      console.log('jwt jwt jwt jwt', token)
-      return token;
-    }
-  },
-  secret: process.env.AUTH_SECRET
 });
 

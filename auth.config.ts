@@ -17,6 +17,27 @@ export const authConfig = {
       }
       return true;
     },
+    session({ session, token }) {
+      if (token) {
+        session.user = {
+          ...session.user,
+          id: token.id as string,
+          role: token.role as string,
+          generate_id: token.generate_id as string,
+          supervisor: token.supervisor as string,
+        };
+      }
+      console.log('session session session session', session)
+      return session;
+    },
+    jwt({ token, user }) {
+      if (user) {
+        token = { ...token, ...user };
+      }
+      console.log('jwt jwt jwt jwt', token)
+      return token;
+    }
   },
   providers: [], // Add providers with an empty array for now
+  secret: process.env.AUTH_SECRET
 } satisfies NextAuthConfig;
