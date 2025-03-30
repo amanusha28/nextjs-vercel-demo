@@ -8,10 +8,11 @@ import { createCustomer, updateCustomer, fetchUniqueNumber } from '@/app/lib/act
 import Link from 'next/link';
 // import { CustomerField } from '@/app/lib/definitions';
 import { customerFormValidation, transformError } from '@/app/lib/validation';
+// import { uploadFileToPinata } from '@/app/lib/upload';
 
 
 // Define the tab type
-type TabKey = 'customer_address' | 'employment' | 'relations' | 'bank_details' | 'documents';
+type TabKey = 'customer_address' | 'employment' | 'relations' | 'bank_details' | 'document';
 
 // Define the tab object type
 type TabObject = {
@@ -25,7 +26,7 @@ const tabs: Set<TabObject> = new Set([
   { key: 'employment', label: 'Employment & Company' },
   { key: 'relations', label: 'Family & Guarantor' },
   { key: 'bank_details', label: 'Banking' },
-  { key: 'documents', label: 'Documents' },
+  { key: 'document', label: 'Documents' },
   // { key: 'remarks', label: 'Remarks' },
 ]);
 
@@ -37,7 +38,7 @@ type FormData = {
   race: string;
   gender: string;
   marital_status: string;
-  no_of_child: number;
+  no_of_child: number | string;
   car_plate: string;
   mobile_no: string;
   status: string;
@@ -59,16 +60,15 @@ type FormData = {
   bank_card_pin: string;
   bank_remark: string;
   
-  documents: Record<string, any>;
+  document: Record<string, any>[];
   
   // remarks: { id?: any; customer_remark: string; created_at: any; updated_at: string }[];
   // customer_remark: string; // Add this optional field for temporary input
 
 };
 
-export default function CustomerForm({ customers }: { customers?: any | null }) {
-  console.log('customers ============= ', customers);
 
+export default function CustomerForm({ customers }: { customers?: any | null }) {
   const [errors, setErrors] = useState<Record<any,any>>({}); // Initialize errors state
   
   // Initialize activeTab with the key of the first tab
@@ -87,20 +87,64 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
     }
   }, [customers]);
 
-  console.log('selectedDate ============= ', selectedDate);
+  // File 
+  const [file, setFile] = useState<File>();
+  const [url, setUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const uploadFile = async () => {
+    try {
+      if (!file) {
+        alert("No file selected");
+        return;
+      }
+
+      setUploading(true);
+      const data = new FormData();
+      data.set("file", file);
+      const response = await fetch("/api/files", {
+        method: "POST",
+        body: data,
+      });
+  
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+  
+      const signedUrl = await response.json();
+      // console.log('signedUrl  signedUrl signedUrl signedUrl signedUrl', signedUrl);
+      setUploading(false);
+
+      setFormData((prev) => ({
+        ...prev,
+        document: [...prev.document, { url: signedUrl, fileName: file.name }],
+      }));
+
+    } catch (e) {
+      console.log(e);
+      setUploading(false);
+      alert("Trouble uploading file");
+    }
+  };
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFile(e.target?.files?.[0]);
+  };
+
+  
+
+  // console.log('selectedDate ============= ', selectedDate);
 
   const [formData, setFormData] = useState<FormData>({
-    name: customers?.name || '',
-    ic: customers?.ic || '',
-    passport: customers?.passport || '',
-    race: customers?.race || '',
-    gender: customers?.gender || '',
-    marital_status: customers?.marital_status || '',
-    no_of_child: customers?.no_of_child || '',
-    car_plate: customers?.car_plate || '',
-    mobile_no: customers?.mobile_no || '',
-    status: customers?.status || '',
-    customer_address: customers?.customer_address || {},
+    name: customers?.name || null,
+    ic: customers?.ic || null,
+    passport: customers?.passport || null,
+    race: customers?.race || null,
+    gender: customers?.gender || null,
+    marital_status: customers?.marital_status || null,
+    no_of_child: customers?.no_of_child || null,
+    car_plate: customers?.car_plate || null,
+    mobile_no: customers?.mobile_no || null,
+    status: customers?.status || null,
+    customer_address: customers?.customer_address || null,
     
     employment: {
       income: customers?.employment?.income || '',
@@ -133,7 +177,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
       bank_remark: bank.bank_remark || '',
     })) || [],
 
-    documents: customers?.documents || [],
+    document: customers?.document || [],
 
     // remarks: customers?.remarks?.map((remark) => {
     //   return {
@@ -176,10 +220,10 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitted Data:', formData);
+    // console.log('Submitted Data:', formData);
 
     const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
-    console.log('Submitter Button ID:', submitter?.id);
+    // console.log('Submitter Button ID:', submitter?.id);
 
     // Handle the Customer Relations (Family & Guarantor) form
     const crId =await fetchUniqueNumber('CR');
@@ -246,12 +290,20 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
     
     setErrors({}); // Clear previous errors if validation passes
 
+    console.log('formData ----->>>>>>>', formData);
+
     if (customers?.id) {
       // Update customer
-      const result = await updateCustomer(customers.id, formData);
+      const result = await updateCustomer(customers.id, {
+        ...formData,
+        no_of_child: formData.no_of_child ? Number(formData.no_of_child) : null,
+      });
       console.log('result ============= ', result);
     } else {
-      const result = await createCustomer(formData);
+      const result = await createCustomer({
+        ...formData,
+        no_of_child: formData.no_of_child ? Number(formData.no_of_child) : null,
+      });
       console.log('result ============= ', result);
     }
   };
@@ -1264,20 +1316,43 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
           </div>
           )}
 
-          {activeTab === 'documents' && (
+          {activeTab === 'document' && (
             <div>
               <label
-                htmlFor="documents"
+                htmlFor="document"
                 className="mb-2 block text-sm font-medium"
               >
                 Upload Documents
               </label>
-              <input
-                id="documents"
-                name="documents"
-                type="file"
-                className="block w-full rounded-md border border-gray-300 py-2 px-3 text-sm"
-              />
+              {/* <div className='bg-zinc-200 h-screen pt-10 flex flex-col'>
+                <h1 className='text-3xl font-bold text-center pt-10 capitalize'>
+                  Upload Document
+                </h1>
+              </div>
+              <div className='flex flex-wrap gap-1 p-5 bg-white w-[650px] min-h-[300px] mx-auto mt-6 mb-10 rounded-md shadow-sm'>
+                
+              </div> */}
+             {/* <div className="w-full min-h-screen m-auto flex flex-col justify-center items-center"> */}
+             <input
+              type="file"
+              onChange={handleFileUpload}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+            />
+
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={uploadFile}
+              className={`mt-4 px-6 py-2 text-white font-semibold rounded-lg transition ${
+                uploading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600"
+              }`}
+            >
+              {uploading ? "Uploading..." : "Upload"}
+            </button>
+
+            {/* </div> */}
             </div>
           )}
         </form>

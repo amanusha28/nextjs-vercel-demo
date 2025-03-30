@@ -1,4 +1,4 @@
-'use server';
+"use server"
 import { PrismaClient } from "@prisma/client";
 import { generateUniqueNumber } from "./data";
 const prisma = new PrismaClient();
@@ -8,6 +8,9 @@ import { redirect } from 'next/navigation';
 
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+
+import { cookies } from "next/headers";
+import { auth } from "@/auth"
 
 
 export async function authenticate(
@@ -48,8 +51,8 @@ interface CustomerRemark {
 interface CustomerFormData {
 	name: string;
 	generate_id?: string;
-	ic: string;
-	passport?: string;
+	ic: string | null;
+	passport?: string | null;
 	race: string;
 	gender: string;
 	marital_status: string;
@@ -62,6 +65,7 @@ interface CustomerFormData {
 	relations: CustomerRelation[];
 	bank_details: CustomerBank[];
 	remarks?: CustomerRemark[];
+	document?: Record<string, any>[];
 }
 
 
@@ -106,7 +110,7 @@ async function updatedCustomerBank(bank_details: CustomerBank[]) {
 }
 
 export async function transformPayload(formData: CustomerFormData) {
-	console.log('formData inside ============= ', formData);
+	// console.log('formData inside ============= ', formData);
 	const parsedData = customerFormValidation.safeParse(formData);
 	if (!parsedData.success) {
 		return { error: parsedData.error.format() }; // Return errors
@@ -115,49 +119,61 @@ export async function transformPayload(formData: CustomerFormData) {
 	if (formData.relations.length > 0) {
 		const temp = await updatedCustomerRelations(formData.relations);
 		formData.relations = temp;
-		console.log('formData.relations ============= ', temp);
+		// console.log('formData.relations ============= ', temp);
 	}
 
 	if (formData.bank_details.length > 0) {
 		const temp = await updatedCustomerBank(formData.bank_details);
 		formData.bank_details = temp;
-		console.log('formData.bank_details ============= ', temp);
+		// console.log('formData.bank_details ============= ', temp);
 	}
 
 	if (!formData.generate_id) {
 		const generate_id = await fetchUniqueNumber('CT');
 		formData.generate_id = generate_id;
 	}
+	
+	if (formData.document?.length === 0) {
+		delete formData.document;
+	}
+	const customerData: CustomerFormData & { document?: Record<string, any>[] } = {
+		name: formData.name,
+		generate_id: formData.generate_id,
+		ic: (formData.ic === '') ? null : formData.ic,
+		passport: (formData.passport === '') ? null : formData.passport,
+		race: formData.race,
+		gender: formData.gender,
+		marital_status: formData.marital_status,
+		no_of_child: formData.no_of_child ? Number(formData.no_of_child) : null,
+		car_plate: formData.car_plate,
+		mobile_no: formData.mobile_no,
+		status: formData.status,
+		customer_address: formData.customer_address,
+		employment: formData.employment,
+		relations: formData.relations,
+		bank_details: formData.bank_details,
+		remarks: formData.remarks,
+	};
 
-	// const customerData = {
-	// 	name: formData.name,
-	// 	generate_id: formData.generate_id,
-	// 	ic: formData.ic,
-	// 	passport: formData.passport,
-	// 	race: formData.race,
-	// 	gender: formData.gender,
-	// 	marital_status: formData.marital_status,
-	// 	no_of_child: formData.no_of_child ? Number(formData.no_of_child) : null,
-	// 	car_plate: formData.car_plate,
-	// 	mobile_no: formData.mobile_no,
-	// 	status: formData.status,
-	// 	customer_address: formData.customer_address,
-	// 	employment: formData.employment,
-	// 	relations: formData.relations,
-	// 	bank_details: formData.bank_details,
-	// 	remarks: formData.remarks,
-	// };
+	if (formData.document?.length === 0) {
+		delete formData.document;
+	} else {
+		customerData.document = formData.document;
+	}
 
 	// console.log('customerData ============= ', customerData);
-	return formData;
+	return customerData;
 }
 
 export async function createCustomer(formData: CustomerFormData) {
 	const customerData = await transformPayload(formData);
 
+	const session = await auth()
+  	console.log(session)
+
 	try {
 		const customer = await prisma.customer.create({
-			data: customerData,
+			data: {...customerData, created_by: session?.user.id},
 		});
 		console.log('Customer created successfully:', customer);
 		revalidatePath('/dashboard/customers');
@@ -169,9 +185,22 @@ export async function createCustomer(formData: CustomerFormData) {
 }
 
 export async function updateCustomer(id: string, formData: CustomerFormData) {
+	// const session = await auth();
+
+	// console.log('session ============= ', session);
 	const customerData = await transformPayload(formData);
 
-	console.log('customerData ============= ', customerData);
+	if (formData.passport) {
+		const isExisting = await checkUniqueConstraint('passport', formData.passport)
+		console.log('isExisting ->', isExisting);
+	}
+
+	if (formData.ic) {
+		const isExisting = await checkUniqueConstraint('ic', formData.ic)
+		console.log('isExisting ->', isExisting);
+	}
+
+	console.log(' updateCustomer customerData ============= ', customerData);
 
 	await prisma.customer.update({
 		data: customerData,
@@ -184,7 +213,7 @@ export async function updateCustomer(id: string, formData: CustomerFormData) {
 }
 
 export async function deleteCustomer(id: string) {
-	console.log('id ============= deleteCustomer ', id);
+	// console.log('id ============= deleteCustomer ', id);
 	await prisma.customer.update({
 		data: { deleted_at: new Date() },
 		where: { id },
@@ -194,4 +223,11 @@ export async function deleteCustomer(id: string) {
 	// redirect('/dashboard/customers');
 }
 
+export async function checkUniqueConstraint(col: string, val: string) {
+	return prisma.customer.findFirst({
+		where: {
+		  [col]: val,
+		},
+	  });
+}
 

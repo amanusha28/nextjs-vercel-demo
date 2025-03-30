@@ -6,7 +6,6 @@ export const authConfig = {
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      // console.log('authorized request request request', request);
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       if (isOnDashboard) {
@@ -27,14 +26,14 @@ export const authConfig = {
           supervisor: token.supervisor as string,
         };
       }
-      console.log('session session session session', session)
+      // console.log('session session session session', session)
       return session;
     },
     jwt({ token, user }) {
       if (user) {
         token = { ...token, ...user };
       }
-      console.log('jwt jwt jwt jwt', token)
+      // console.log('jwt jwt jwt jwt', token)
       return token;
     }
   },

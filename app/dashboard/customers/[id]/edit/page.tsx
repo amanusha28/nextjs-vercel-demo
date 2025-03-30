@@ -7,7 +7,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 	const params = await props.params;
 	const id = params.id;
 	const customers = await fetchCustomerById(id);
-	console.log('*********** customers in the edit page **********', customers);
+	// console.log('*********** customers in the edit page **********', customers);
 	if (!customers) {
 		notFound();
 	}

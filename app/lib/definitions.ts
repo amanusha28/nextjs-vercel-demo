@@ -80,6 +80,6 @@ export type CustomerField = {
   employment?: Record<string, any>; 
   relations?: Record<string, any>[]; 
   bank_details?: Record<string, any>[]; 
-  documents?: Record<string, any>[]; 
+  document?: Record<string, any>[]; 
   // remarks?: Record<string, any>[]; 
 };

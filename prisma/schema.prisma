@@ -64,4 +64,5 @@ model customer {
   status           String?    @db.VarChar(255)
   remarks          Json?
   created_by       String?    @db.Uuid
+  document         Json?
 }

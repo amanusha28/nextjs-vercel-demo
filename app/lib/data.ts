@@ -1,5 +1,8 @@
+"use server"
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+
+import { auth } from '@/auth';
 
 export async function generateUniqueNumber(category: string): Promise<string> {
   const now = new Date();
@@ -37,11 +40,15 @@ export async function fetchCustomers(payload: {
 }) {
   const { query, currentPage, pageSize } = payload;
   try {
+    const session = await auth()
+    console.log(session)
+
     console.log('Fetching customers with query:', query);
     const skip = (currentPage - 1) * pageSize;
 
     const customers = await prisma.customer.findMany({
       where: {
+        created_by: session?.user.id,
         deleted_at: null,
         OR: [
           { name: { contains: query, mode: 'insensitive' } },
@@ -72,6 +79,7 @@ export async function fetchCustomers(payload: {
 }
 
 export async function fetchCustomerById(id: string) {
+
   try {
     const customer = await prisma.customer.findUnique({
       where: { id },
