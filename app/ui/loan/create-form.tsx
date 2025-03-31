@@ -8,28 +8,28 @@ import AgentDropdownInput from './agent-dropdown';
 import CustomerDropdownInput from './customer-dropdown';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { createLoan, fetchUniqueNumber } from "@/app/lib/actions";
+import { createLoan, fetchUniqueNumber, updateLoan } from "@/app/lib/actions";
 
 type LoanData = {
   id?: string;
-  generate_id?: string | null;
+  generate_id?: any;
   agent_1?: string | null;
   agent_2?: string | null;
   customer_id?: string | null;
-  principal_amount?: number | null;
-  deposit_amount?: number | null;
-  application_fee?: number | null;
+  principal_amount?: string | null;
+  deposit_amount?: string | null;
+  application_fee?: string | null;
   repayment_date?: string | null;
   unit_period?: string | null;  // Ensure consistent naming
-  date_period?: number | null;   // Match backend type
-  repayment_term?: number | null;
-  interest?: number | null;
-  amount_given?: number | null;
-  interest_amount?: number | null;
-  payment_per_term?: number | null;
+  date_period?: string | null;   // Match backend type
+  repayment_term?: string | null;
+  interest?: string | null;
+  amount_given?: string | null;
+  interest_amount?: string | null;
+  payment_per_term?: string | null;
   loan_remark?: string | null;
   status?: string | null;
-  created_at?: string;
+  created_at?: any;
   created_by?: string;
   supervisor?: string | null;
   supervisor_2?: string | null;
@@ -42,9 +42,9 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
   const [formData, setFormData] = useState<LoanData>({
     ...loan,
     repayment_date: loan?.repayment_date || null, // Ensuring consistency
-    agent_1: loan?.agent_1 || null,
-    agent_2: loan?.agent_2 || null,
-    customer_id: loan?.customer_id || null,
+    agent_1: loan?.user_loan_agent_1Touser?.id || null, // Access nested agent ID
+    agent_2: loan?.user_loan_agent_2Touser?.id || null, // Access nested agent ID
+    customer_id: loan?.customer.id || null,
     unit_period: loan?.unit_period || null, // Ensuring type consistency
     date_period: loan?.date_period || null, // Ensuring type consistency
     repayment_term: loan?.repayment_term || null, // Ensuring type consistency
@@ -65,16 +65,16 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
     const interest = formData.interest ?? 0;
     const repayment_term = formData.repayment_term ?? 0;
   
-    if (repayment_term > 0) {
-      const amount_given = principal_amount - deposit_amount - application_fee;
-      const interest_amount = principal_amount * (interest / 100) * repayment_term;
-      const payment_per_term = (principal_amount - deposit_amount) / repayment_term;
+    if (Number(repayment_term) > 0) {
+      const amount_given = Number(principal_amount) - Number(deposit_amount) - Number(application_fee);
+      const interest_amount = Number(principal_amount) * (Number(interest) / 100) * Number(repayment_term);
+      const payment_per_term = (Number(principal_amount) - Number(deposit_amount)) / Number(repayment_term);
   
       setFormData((prev) => ({
         ...prev,
-        amount_given,
-        interest_amount,
-        payment_per_term,
+        amount_given: amount_given.toString(),
+        interest_amount: interest_amount.toString(),
+        payment_per_term: payment_per_term.toString(),
       }));
     }
   };
@@ -87,25 +87,21 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form Data:", formData);
+    delete formData.customer
+    delete formData.user_loan_agent_1Touser
+    delete formData.user_loan_agent_2Touser
 
     if (loan?.id) {
-
+      const result = await updateLoan(loan.id, formData);
+      // if (result) {
+        console.log('Loan Created', result)
     }else {
       // get custom id
       const loId =await fetchUniqueNumber('LO');
-      const result = await createLoan({
-        ...formData,
-        principal_amount: formData.principal_amount ? Number(formData.principal_amount) : null,
-        deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : null,
-        application_fee: formData.application_fee ? Number(formData.application_fee) : null,
-        repayment_term: formData.repayment_term ? Number(formData.repayment_term) : null,
-        customer_id: formData.customer_id || undefined, // Ensure it's string or undefined
-        unit_period: formData.unit_period ? Number(formData.unit_period) : null, // Convert to number
-        generate_id: loId,
-      });
-      if (result) {
-        console.log('Loan Created')
-      }
+      const result = await createLoan({...formData, generate_id: loId});
+      // if (result) {
+        console.log('Loan Created', result)
+      // }
     }
     // Add API call logic here
   };
@@ -116,11 +112,18 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
       <div>
         {/* Basic Info Section */}
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        <AgentDropdownInput onChange={(agent1, agent2) => {
+        <AgentDropdownInput 
+        onChange={(agent1, agent2) => {
           handleDropdownChange("agent_1", agent1);
           handleDropdownChange("agent_2", agent2);
-        }}/>
-          <CustomerDropdownInput onChange={(customerId) => handleDropdownChange("customer_id", customerId)}/>
+        }}
+        initialAgent1={loan?.user_loan_agent_1Touser?.id || null}
+        initialAgent2={loan?.user_loan_agent_2Touser?.id || null}
+        />
+          <CustomerDropdownInput 
+          onChange={(customer_id) => handleDropdownChange("customer_id", customer_id)}
+          initialCustomer={loan?.customer.id || null}
+          />
           <div className="space-y-2">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 gap-y-6">
 

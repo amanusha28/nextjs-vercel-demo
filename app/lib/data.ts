@@ -74,7 +74,7 @@ export async function fetchCustomers(payload: {
     const session = await auth()
     console.log(session)
 
-    console.log('Fetching customers with query:', query);
+    // console.log('Fetching customers with query:', query);
     const skip = (currentPage - 1) * pageSize;
 
     const customers = await prisma.customer.findMany({
@@ -138,7 +138,7 @@ export async function fetchLoan(payload: {
     const session = await auth()
     console.log(session)
 
-    console.log('Fetching customers with query:', query);
+    // console.log('Fetching customers with query:', query);
     const skip = (currentPage - 1) * pageSize;
 
     const loan = await prisma.loan.findMany({
@@ -193,11 +193,71 @@ export async function fetchLoanById(id: string) {
   try {
     const customer = await prisma.loan.findUnique({
       where: { id },
+      include: {
+        customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        user_loan_agent_1Touser: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        user_loan_agent_2Touser: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     return customer;
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch the customer.');
+  }
+}
+
+
+
+/**
+ * ###############################################
+ *            Country, State, City Data
+ * ###############################################
+ */
+export async function fetchCountry() {
+  try {
+    const country = await prisma.country.findMany({
+    });
+    return country
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all loan.');
+  }
+}
+
+export async function fetchState() {
+  try {
+    const state = await prisma.state.findMany({
+    });
+    return state
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all loan.');
+  }
+}
+
+export async function fetchCity() {
+  try {
+    const city = await prisma.city.findMany({
+    });
+    return city
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all loan.');
   }
 }

@@ -1,0 +1,19 @@
+-- AlterTable
+ALTER TABLE "loan" ALTER COLUMN "principal_amount" SET DATA TYPE TEXT,
+ALTER COLUMN "deposit_amount" SET DATA TYPE TEXT,
+ALTER COLUMN "application_fee" SET DATA TYPE TEXT,
+ALTER COLUMN "interest" SET DATA TYPE TEXT,
+ALTER COLUMN "date_period" SET DATA TYPE TEXT,
+ALTER COLUMN "repayment_term" SET DATA TYPE TEXT,
+ALTER COLUMN "amount_given" SET DATA TYPE TEXT,
+ALTER COLUMN "interest_amount" SET DATA TYPE TEXT,
+ALTER COLUMN "payment_per_term" SET DATA TYPE TEXT;
+
+-- AddForeignKey
+ALTER TABLE "loan" ADD CONSTRAINT "loan_customer_fk" FOREIGN KEY ("customer_id") REFERENCES "customer"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "loan" ADD CONSTRAINT "loan_user_fk" FOREIGN KEY ("agent_1") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "loan" ADD CONSTRAINT "loan_user_fk_1" FOREIGN KEY ("agent_2") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;

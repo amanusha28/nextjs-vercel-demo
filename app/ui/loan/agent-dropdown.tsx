@@ -5,13 +5,17 @@ import { fetchAllAgent } from "@/app/lib/data";
 
 export default function AgentDropdownInput({
   onChange,
+  initialAgent1 = null,
+  initialAgent2 = null,
 }: {
   onChange: (agent_1: string | null, agent_2: string | null) => void;
+  initialAgent1?: string | null;
+  initialAgent2?: string | null;
 }) {
   const [agent1Query, setAgent1Query] = useState("");
   const [agent2Query, setAgent2Query] = useState("");
-  const [selectedAgent1, setSelectedAgent1] = useState<string | null>(null);
-  const [selectedAgent2, setSelectedAgent2] = useState<string | null>(null);
+  const [selectedAgent1, setSelectedAgent1] = useState<string | null>(initialAgent1);
+  const [selectedAgent2, setSelectedAgent2] = useState<string | null>(initialAgent2);
   const [data, setData] = useState<{ id: string; name: string }[]>([]);
   const [showDropdown1, setShowDropdown1] = useState(false);
   const [showDropdown2, setShowDropdown2] = useState(false);
@@ -30,6 +34,24 @@ export default function AgentDropdownInput({
     }
     loadAgents();
   }, []);
+
+  useEffect(() => {
+    if (initialAgent1) {
+      const agent1 = data.find((agent) => agent.id === initialAgent1);
+      if (agent1) {
+        setAgent1Query(agent1.name);
+      }
+    }
+  }, [data, initialAgent1]);
+
+  useEffect(() => {
+    if (initialAgent2) {
+      const agent2 = data.find((agent) => agent.id === initialAgent2);
+      if (agent2) {
+        setAgent2Query(agent2.name);
+      }
+    }
+  }, [data, initialAgent2]);
 
   const handleSelectAgent1 = (id: string, name: string) => {
     setAgent1Query(name);
@@ -73,7 +95,9 @@ export default function AgentDropdownInput({
                 {data.map((item) => (
                   <li
                     key={item.id}
-                    className="p-2 cursor-pointer hover:bg-blue-500 hover:text-white"
+                    className={`p-2 cursor-pointer hover:bg-blue-500 hover:text-white ${
+                      item.id === selectedAgent1 ? "bg-blue-500 text-white" : ""
+                    }`}
                     onMouseDown={() => handleSelectAgent1(item.id, item.name)}
                   >
                     {item.name}
@@ -109,7 +133,9 @@ export default function AgentDropdownInput({
                 {data.map((item) => (
                   <li
                     key={item.id}
-                    className="p-2 cursor-pointer hover:bg-blue-500 hover:text-white"
+                    className={`p-2 cursor-pointer hover:bg-blue-500 hover:text-white ${
+                      item.id === selectedAgent2 ? "bg-blue-500 text-white" : ""
+                    }`}
                     onMouseDown={() => handleSelectAgent2(item.id, item.name)}
                   >
                     {item.name}

@@ -255,25 +255,26 @@ export async function checkUniqueConstraint(col: string, val: string) {
  */
 
 interface LoanFormData {
-	customer_id?: string;
-	repayment_date?: string | null;
-	principal_amount?: number | null;
-	deposit_amount?: number | null;
-	application_fee?: number | null;
-	interest?: number | null;
-	remark?: string | null;
-	created_by?: string;
-	supervisor?: string | null;
-	supervisor_2?: string | null;
-	date_period?: number | null; // Changed from string to match LoanData
-	loan_remark?: string | null;
-	unit_period?: number | null; // Renamed to match LoanData
-	generate_id?: string | null;
-	repayment_term?: number | null;
-	status?: string | null;
-	amount_given?: number | null;
-	interest_amount?: number | null;
-	payment_per_term?: number | null;
+	customer_id?: any
+	created_by?: string | null
+	loan_remark?: string | null
+	generate_id?: any
+	status?: string | null
+	agent_1?: any
+	agent_2?: any
+	created_at?: Date
+	unit_period?: string | null
+	repayment_date?: string | null
+	principal_amount?: string | null
+	deposit_amount?: string | null
+	application_fee?: string | null
+	interest?: string | null
+	date_period?: string | null
+	repayment_term?: string | null
+	amount_given?: string | null
+	interest_amount?: string | null
+	payment_per_term?: string | null
+	deleted_at?: Date | null
 }
 
 // Soft Delete Loan
@@ -284,13 +285,8 @@ export async function deleteLoan(id: string) {
 		where: { id },
 	});
 	console.log('Customer Successfully Deleted');
-	revalidatePath('/dashboard/customers');
+	revalidatePath('/dashboard/loan');
 	// redirect('/dashboard/customers');
-}
-
-export async function updateLoan(id: string, formData: LoanFormData) {
-	console.log('updateLoan updateLoan updateLoan updateLoan')
-	console.log(id, formData);
 }
 
 export async function createLoan(formData: LoanFormData) {
@@ -298,20 +294,33 @@ export async function createLoan(formData: LoanFormData) {
 	console.log(session)
 	console.log('createLoan createLoan createLoan createLoan')
 	console.log({ ...formData, created_by: session?.user.id });
+	if (!formData.generate_id) {
+		formData.generate_id = await fetchUniqueNumber('LN'); // Ensure generate_id is provided
+	}
+
+	const loanData = {
+		...formData,
+		generate_id: formData.generate_id, // Ensure generate_id is always defined
+		created_by: session?.user.id,
+	};
+
 	await prisma.loan.create({
+		data: loanData,
+	});
+	revalidatePath('/dashboard/loan');
+	redirect('/dashboard/loan');
+}
+
+export async function updateLoan(id: string, formData: LoanFormData) {
+	const session = await auth()
+	console.log(session)
+	console.log('createLoan createLoan createLoan createLoan')
+	console.log({ ...formData, created_by: session?.user.id });
+	await prisma.loan.update({
+		where: { id },
 		data: {
 			...formData,
-			generate_id: formData.generate_id ?? '', // Ensure it's a string
 			created_by: session?.user.id,
-			principal_amount: formData.principal_amount ?? null,
-			deposit_amount: formData.deposit_amount ?? null,
-			application_fee: formData.application_fee ?? null,
-			interest: formData.interest !== undefined ? Number(formData.interest) : null,
-			amount_given: formData.amount_given ?? null,
-			interest_amount: formData.interest_amount !== undefined ? Number(formData.interest_amount) : null,
-			payment_per_term: formData.payment_per_term ?? null,
-			date_period: formData.unit_period ? Number(formData.unit_period) : null,
-			unit_period: formData.unit_period !== undefined && formData.unit_period !== null ? String(formData.unit_period) : null,
 		},
 	});
 	revalidatePath('/dashboard/loan');

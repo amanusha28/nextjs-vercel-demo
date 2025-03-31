@@ -5,11 +5,13 @@ import { fetchCustomers } from "@/app/lib/data";
 
 export default function CustomerDropdownInput({
   onChange,
+  initialCustomer = null
 }: {
   onChange: (customer_id: string | null) => void;
+  initialCustomer?: string | null;
 }) {
   const [customerQuery, setCustomerQuery] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(initialCustomer);
   const [showDropdown1, setShowDropdown1] = useState(false);
   const [data, setData] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +33,15 @@ export default function CustomerDropdownInput({
     }
     loadCustomers();
   }, []);
+
+  useEffect(() => {
+    if (initialCustomer) {
+      const cus = data.find((agent) => agent.id === initialCustomer);
+      if (cus) {
+        setCustomerQuery(cus.name);
+      }
+    }
+  }, [data, initialCustomer]);
 
   const handleSelectCustomer = (id: string, name: string) => {
     setCustomerQuery(name);
