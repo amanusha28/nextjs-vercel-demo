@@ -5,11 +5,9 @@ const prisma = new PrismaClient();
 import { customerFormValidation } from "./validation";
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-
-import { signIn } from '@/auth';
+import { signIn, signOut, auth } from '@/auth';
 import { AuthError } from 'next-auth';
-
-import { auth } from "@/auth"
+import bcrypt from "bcryptjs";
 
 
 export async function authenticate(
@@ -31,6 +29,9 @@ export async function authenticate(
 	}
 }
 
+export async function handleSignOut() {
+	await signOut({ redirectTo: '/login' });
+}
 
 /**
  * ###########################################################
@@ -38,9 +39,52 @@ export async function authenticate(
  * ###########################################################
  */
 
-export async function getAllAgent() {
-
+interface ChangePasswordFormData {
+	currentPassword: string;
+	newPassword: string;
 }
+
+export async function changePassword(formData: FormData): Promise<{ success: boolean }> {
+	const { currentPassword, newPassword } = Object.fromEntries(formData) as unknown as ChangePasswordFormData;
+
+	// Get the current session
+	const session = await auth();
+	if (!session?.user?.email) {
+		throw new Error('User not authenticated');
+	}
+	console.log('session data', session);
+
+	// Fetch the user from the database
+	const user = await prisma.user.findUnique({
+		where: { id: session.user.id },
+	});
+	console.log('user data after session', user);
+	if (!user) {
+		throw new Error('User not found');
+	}
+
+	// Verify the current password
+	if (!user.password) {
+		throw new Error('User password is not set');
+	}
+	const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+	console.log('isPasswordValid', isPasswordValid)
+	if (!isPasswordValid) {
+		throw new Error('Current password is incorrect');
+	}
+
+	// Hash the new password
+	const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+	// Update the user's password in the database
+	await prisma.user.update({
+		where: { email: session.user.email },
+		data: { password: hashedPassword },
+	});
+
+	return { success: true };
+}
+
 
 
 /**
@@ -216,7 +260,7 @@ export async function updateCustomer(id: string, formData: CustomerFormData) {
 		console.log('isExisting ->', isExisting);
 	}
 
-	console.log(' updateCustomer customerData ============= ', customerData);
+	// console.log(' updateCustomer customerData ============= ', customerData);
 
 	await prisma.customer.update({
 		data: customerData,
@@ -291,9 +335,9 @@ export async function deleteLoan(id: string) {
 
 export async function createLoan(formData: LoanFormData) {
 	const session = await auth()
-	console.log(session)
-	console.log('createLoan createLoan createLoan createLoan')
-	console.log({ ...formData, created_by: session?.user.id });
+	// console.log(session)
+	// console.log('createLoan createLoan createLoan createLoan')
+	// console.log({ ...formData, created_by: session?.user.id });
 	if (!formData.generate_id) {
 		formData.generate_id = await fetchUniqueNumber('LN'); // Ensure generate_id is provided
 	}
@@ -307,15 +351,21 @@ export async function createLoan(formData: LoanFormData) {
 	await prisma.loan.create({
 		data: loanData,
 	});
+	console.log(
+		formData.repayment_date,
+		formData.date_period,
+		formData.date_period,
+		formData.repayment_term,
+	);
 	revalidatePath('/dashboard/loan');
 	redirect('/dashboard/loan');
 }
 
 export async function updateLoan(id: string, formData: LoanFormData) {
 	const session = await auth()
-	console.log(session)
-	console.log('createLoan createLoan createLoan createLoan')
-	console.log({ ...formData, created_by: session?.user.id });
+	// console.log(session)
+	// console.log('createLoan createLoan createLoan createLoan')
+	// console.log({ ...formData, created_by: session?.user.id });
 	await prisma.loan.update({
 		where: { id },
 		data: {
@@ -325,4 +375,57 @@ export async function updateLoan(id: string, formData: LoanFormData) {
 	});
 	revalidatePath('/dashboard/loan');
 	redirect('/dashboard/loan');
+}
+
+export async function getInstallmentDates(
+	startDate: string,
+	period: string,
+	interval: number,
+	repaymentTerm: number
+): Promise<string[]> {
+	const dates: string[] = [];
+	let currentDate = new Date(startDate);
+
+	for (let i = 0; i < repaymentTerm; i++) {
+		dates.push(currentDate.toISOString().split('T')[0]); // Formats date as YYYY-MM-DD
+
+		switch (period) {
+			case 'day':
+				currentDate.setDate(currentDate.getDate() + interval);
+				break;
+			case 'week':
+				currentDate.setDate(currentDate.getDate() + interval * 7);
+				break;
+			case 'month':
+				currentDate.setMonth(currentDate.getMonth() + interval);
+				break;
+			case 'year':
+				currentDate.setFullYear(currentDate.getFullYear() + interval);
+				break;
+			default:
+				throw new Error('Invalid period type');
+		}
+	}
+
+	return dates;
+}
+
+
+
+/**
+ * ###############################################
+ *            Country, State, City Data
+ * ###############################################
+ */
+
+export async function fetchCountry() {
+	return await prisma.country.findMany();
+}
+
+export async function fetchState() {
+	return await prisma.state.findMany();
+}
+
+export async function fetchCity() {
+	return await prisma.city.findMany();
 }

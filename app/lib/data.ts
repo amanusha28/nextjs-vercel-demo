@@ -136,7 +136,7 @@ export async function fetchLoan(payload: {
   const { query, currentPage, pageSize } = payload;
   try {
     const session = await auth()
-    console.log(session)
+    // console.log(session)
 
     // console.log('Fetching customers with query:', query);
     const skip = (currentPage - 1) * pageSize;
@@ -180,7 +180,7 @@ export async function fetchLoan(payload: {
         // ]
       },
     });
-    console.log({ totalLoan, loan })
+    // console.log({ totalLoan, loan })
     return { totalLoan, loan };
   } catch (err) {
     console.error('Database Error:', err);
