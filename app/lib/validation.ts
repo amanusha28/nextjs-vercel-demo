@@ -46,3 +46,28 @@ export function transformError(errorObject: any) {
 
 	return formattedError;
 }  
+
+// Loan 
+
+export const loanFormValidation = z.object({
+	customer_id: z.string().optional().nullable(),
+	repayment_date: z.string().optional().nullable(),
+	principal_amount: z.number().optional().nullable(),
+	deposit_amount: z.number().optional().nullable(),
+	application_fee: z.number().optional().nullable(),
+	interest: z.number().optional().nullable(),
+	remark: z.string().optional().nullable(),
+	created_by: z.string().optional().nullable(),
+	supervisor: z.string().optional().nullable(),
+	supervisor_2: z.string().optional().nullable(),
+	date_period: z.string().optional().nullable(),
+	loan_remark: z.string().optional().nullable(),
+	unit_of_date: z.string().optional().nullable(),
+	generate_id: z.string().optional().nullable(),
+	repayment_term: z.string().optional().nullable(),
+	status: z.string().optional().nullable(),
+	amount_given: z.number().optional().nullable(),
+	interest_amount: z.number().optional().nullable(),
+	payment_per_term: z.number().optional().nullable(),
+});
+

@@ -35,6 +35,37 @@ export async function generateUniqueNumber(category: string): Promise<string> {
   return `${category.toUpperCase()}${year}${formattedNumber}`;
 }
 
+/**
+ * ###########################################################
+ * 						User Data
+ * ###########################################################
+ */
+
+export async function fetchAllAgent() {
+  try {
+    const agents = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      where: {
+        deleted_at: null,
+      },
+    });
+
+    return agents;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all customers.');
+  }
+}
+
+/**
+ * ###########################################################
+ * 						Customer Data
+ * ###########################################################
+ */
+
 export async function fetchCustomers(payload: { 
   query: any; currentPage: number; pageSize: number; 
 }) {
@@ -89,5 +120,55 @@ export async function fetchCustomerById(id: string) {
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch the customer.');
+  }
+}
+
+
+/**
+ * ###############################################
+ *                    Loan Data
+ * ###############################################
+ */
+
+export async function fetchLoan(payload: { 
+  query: any; currentPage: number; pageSize: number; 
+}) {
+  const { query, currentPage, pageSize } = payload;
+  try {
+    const session = await auth()
+    console.log(session)
+
+    console.log('Fetching customers with query:', query);
+    const skip = (currentPage - 1) * pageSize;
+
+    const loan = await prisma.loan.findMany({
+      where: {
+        created_by: session?.user.id,
+        deleted_at: null,
+        // OR: [
+        //   { name: { contains: query, mode: 'insensitive' } },
+        //   { ic: { contains: query, mode: 'insensitive' } },
+        //   { passport: { contains: query, mode: 'insensitive' } },
+        // ]
+      },
+      skip,
+      take: pageSize,
+    });
+
+    const totalLoan = await prisma.customer.count({
+      where: {
+        deleted_at: null,
+        // OR: [
+        //   { name: { contains: query, mode: 'insensitive' } },
+        //   { ic: { contains: query, mode: 'insensitive' } },
+        //   { passport: { contains: query, mode: 'insensitive' } },
+        // ]
+      },
+    });
+
+    return { totalLoan, loan };
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all customers.');
   }
 }

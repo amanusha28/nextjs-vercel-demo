@@ -634,7 +634,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                   <textarea
                     id="perm_address_line"
                     name="perm_address_line"
-                    value={formData.customer_address.perm_address_line || ''}
+                    value={formData.customer_address?.perm_address_line || ''}
                     onChange={handleInputChange}
                     placeholder="Enter Address Lines"
                     className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
@@ -648,7 +648,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                   <input
                     id="perm_postal_code"
                     name="perm_postal_code"
-                    value={formData.customer_address.perm_postal_code || ''}
+                    value={formData.customer_address?.perm_postal_code || ''}
                     onChange={handleInputChange}
                     type="number"
                     placeholder="Enter Postal Code"
@@ -664,7 +664,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                   <select
                     id="perm_country"
                     name="perm_country"
-                    value={formData.customer_address.perm_country || ''}
+                    value={formData.customer_address?.perm_country || ''}
                     onChange={handleInputChange}
                     className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
                   >
@@ -683,7 +683,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                   <select
                     id="perm_state"
                     name="perm_state"
-                    value={formData.customer_address.perm_state || ''}
+                    value={formData.customer_address?.perm_state || ''}
                     onChange={handleInputChange}
                     className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
                   >
@@ -702,7 +702,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                   <select
                     id="perm_city"
                     name="perm_city"
-                    value={formData.customer_address.perm_city || ''}
+                    value={formData.customer_address?.perm_city || ''}
                     onChange={handleInputChange}
                     className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
                   >
@@ -742,7 +742,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                       <textarea
                         id="corr_address_line"
                         name="corr_address_line"
-                        value={formData.customer_address.corr_address_line || ''}
+                        value={formData.customer_address?.corr_address_line || ''}
                         onChange={handleInputChange}
                         placeholder="Enter Address Lines"
                         className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
@@ -756,7 +756,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                       <input
                         id="corr_postal_code"
                         name="corr_postal_code"
-                        value={formData.customer_address.corr_postal_code || ''}
+                        value={formData.customer_address?.corr_postal_code || ''}
                         onChange={handleInputChange}
                         type="number"
                         placeholder="Enter Postal Code"
@@ -772,7 +772,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                       <select
                         id="corr_country"
                         name="corr_country"
-                        value={formData.customer_address.corr_country || ''}
+                        value={formData.customer_address?.corr_country || ''}
                         onChange={handleInputChange}
                         className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
                       >
@@ -791,7 +791,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                       <select
                         id="corr_state"
                         name="corr_state"
-                        value={formData.customer_address.corr_state || ''}
+                        value={formData.customer_address?.corr_state || ''}
                         onChange={handleInputChange}
                         className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
                       >
@@ -810,7 +810,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                       <select
                         id="corr_city"
                         name="corr_city"
-                        value={formData.customer_address.corr_city || ''}
+                        value={formData.customer_address?.corr_city || ''}
                         onChange={handleInputChange}
                         className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
                       >

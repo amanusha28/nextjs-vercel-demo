@@ -33,6 +33,23 @@ export async function authenticate(
 }
 
 
+/**
+ * ###########################################################
+ * 						User Data
+ * ###########################################################
+ */
+
+export async function getAllAgent() {
+	
+}
+
+
+/**
+ * ###########################################################
+ * 						Customer Data
+ * ###########################################################
+ */
+
 interface CustomerRelation {
 	id?: string;
 	[key: string]: any;
@@ -212,6 +229,7 @@ export async function updateCustomer(id: string, formData: CustomerFormData) {
 
 }
 
+// Soft Delete Customer
 export async function deleteCustomer(id: string) {
 	// console.log('id ============= deleteCustomer ', id);
 	await prisma.customer.update({
@@ -229,5 +247,55 @@ export async function checkUniqueConstraint(col: string, val: string) {
 			[col]: val,
 		},
 	});
+}
+
+/**
+ * ###############################################
+ *                    Loan Data
+ * ###############################################
+ */
+
+interface LoanFormData {
+	customer_id?: string;
+	repayment_date?: string;
+	principal_amount?: number;
+	deposit_amount?: number;
+	application_fee?: number;
+	interest?: number;
+	remark?: string;
+	created_by?: string;
+	supervisor?: string;
+	supervisor_2?: string;
+	date_period?: string;
+	loan_remark?: string;
+	unit_of_date?: string;
+	generate_id?: string;
+	repayment_term?: string;
+	status?: string;
+	amount_given?: number;
+	interest_amount?: number;
+	payment_per_term?: number;
+}
+
+// Soft Delete Loan
+export async function deleteLoan(id: string) {
+	// console.log('id ============= deleteCustomer ', id);
+	await prisma.loan.update({
+		data: { deleted_at: new Date() },
+		where: { id },
+	});
+	console.log('Customer Successfully Deleted');
+	revalidatePath('/dashboard/customers');
+	// redirect('/dashboard/customers');
+}
+
+export async function updateLoan(id: string, formData: LoanFormData) {
+	console.log('updateLoan updateLoan updateLoan updateLoan')
+	console.log(id, formData);
+}
+
+export async function createLoan( formData: LoanFormData) {
+	console.log('createLoan createLoan createLoan createLoan')
+	console.log(formData);
 }
 

@@ -66,3 +66,28 @@ model customer {
   created_by       String?    @db.Uuid
   document         Json?
 }
+
+model loan {
+  id          String   @id(map: "loan_pk") @default(uuid()) @db.Uuid
+  generate_id String   @db.VarChar
+  agent_1           String?    @db.Uuid
+  agent_2           String?    @db.Uuid
+  customer_id       String?    @db.Uuid
+  principal_amount  Float?
+  deposit_amount    Float?
+  application_fee   Float?
+  repayment_date    DateTime?
+  unit_period       Int?
+  date_period       Int?
+  repayment_term    Int?
+  interest          Float?
+  amount_given      Float?
+  interest_amount      Float?
+  payment_per_term  Float?
+  loan_remark       String?    @db.VarChar(255)
+  status            String?    @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  created_by  String?  @db.Uuid
+  deleted_at  DateTime?
+}
+
