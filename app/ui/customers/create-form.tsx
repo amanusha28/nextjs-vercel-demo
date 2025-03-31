@@ -4,10 +4,13 @@ import React, { useEffect, useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Button } from '../button';
-import { createCustomer, updateCustomer, fetchUniqueNumber } from '@/app/lib/actions';
+import { createCustomer, updateCustomer, fetchUniqueNumber, fetchCountry, fetchState, fetchCity } from '@/app/lib/actions';
 import Link from 'next/link';
 // import { CustomerField } from '@/app/lib/definitions';
 import { customerFormValidation, transformError } from '@/app/lib/validation';
+import CountryDropdown from '../CountryDropdown';
+import StateDropdown from '../StateDropdown';
+import CityDropdown from '../CityDropdown';
 // import { uploadFileToPinata } from '@/app/lib/upload';
 
 
@@ -70,6 +73,11 @@ type FormData = {
 
 export default function CustomerForm({ customers }: { customers?: any | null }) {
   const [errors, setErrors] = useState<Record<any,any>>({}); // Initialize errors state
+
+  const [selectedCountry, setSelectedCountry] = useState<string>(customers?.customer_address?.perm_country || '');
+  const [selectedState, setSelectedState] = useState<string>(customers?.customer_address?.perm_state || '');
+  const [selectedCity, setSelectedCity] = useState<string>(customers?.customer_address?.perm_city || '');
+
   
   // Initialize activeTab with the key of the first tab
   const initialTab = tabs.values().next().value?.key;
@@ -127,6 +135,35 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
   };
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target?.files?.[0]);
+  };
+
+  /** 
+   * ====================================
+   * Handle Country, State, City
+   *=====================================
+   */
+   const handleCountryChange = (country: string) => {
+    setSelectedCountry(country);
+    setFormData((prev) => ({
+      ...prev,
+      customer_address: { ...prev.customer_address, perm_country: country }
+    }));
+  };
+  
+  const handleStateChange = (state: string) => {
+    setSelectedState(state);
+    setFormData((prev) => ({
+      ...prev,
+      customer_address: { ...prev.customer_address, perm_state: state }
+    }));
+  };
+  
+  const handleCityChange = (city: string) => {
+    setSelectedCity(city);
+    setFormData((prev) => ({
+      ...prev,
+      customer_address: { ...prev.customer_address, perm_city: city }
+    }));
   };
 
   
@@ -290,7 +327,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
     
     setErrors({}); // Clear previous errors if validation passes
 
-    console.log('formData ----->>>>>>>', formData);
+    // console.log('formData ----->>>>>>>', formData);
 
     if (customers?.id) {
       // Update customer
@@ -657,61 +694,14 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                 </div>
 
                 {/* Country */}
-                <div>
-                  <label htmlFor="perm_country" className="mb-2 block text-sm font-medium">
-                    Country
-                  </label>
-                  <select
-                    id="perm_country"
-                    name="perm_country"
-                    value={formData.customer_address?.perm_country || ''}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-                  >
-                    <option value="">Select Country</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+                <CountryDropdown selected={selectedCountry} onSelect={handleCountryChange} />
+                
 
                 {/* State */}
-                <div>
-                  <label htmlFor="perm_state" className="mb-2 block text-sm font-medium">
-                    State
-                  </label>
-                  <select
-                    id="perm_state"
-                    name="perm_state"
-                    value={formData.customer_address?.perm_state || ''}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-                  >
-                    <option value="">Select State</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+                <StateDropdown selected={selectedState} onSelect={handleStateChange}/>
 
                 {/* City */}
-                <div>
-                  <label htmlFor="perm_city" className="mb-2 block text-sm font-medium">
-                    City
-                  </label>
-                  <select
-                    id="perm_city"
-                    name="perm_city"
-                    value={formData.customer_address?.perm_city || ''}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-                  >
-                    <option value="">Select City</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+                <CityDropdown selected={selectedCity} onSelect={handleCityChange}/>
 
               </div>
 
