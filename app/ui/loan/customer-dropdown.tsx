@@ -8,32 +8,39 @@ export default function CustomerDropdownInput({
 }: {
   onChange: (customer_id: string | null) => void;
 }) {
-  const [customerQuery, setcustomerQuery] = useState("");
+  const [customerQuery, setCustomerQuery] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [showDropdown1, setShowDropdown1] = useState(false);
   const [data, setData] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadAgents() {
+    async function loadCustomers() {
       try {
         const customer = await fetchCustomers({ 
           query: customerQuery, 
           currentPage: 1, 
           pageSize: 50
-        }); // Fetch only once
+        });
         setData(customer.customers.map((c) => ({ id: c.id, name: c.name || "" })));
       } catch (error) {
-        console.error("Error fetching agents:", error);
+        console.error("Error fetching customers:", error);
       } finally {
         setLoading(false);
       }
     }
-    loadAgents();
-  }, []); // Empty dependency array ensures it runs only once
+    loadCustomers();
+  }, []);
+
+  const handleSelectCustomer = (id: string, name: string) => {
+    setCustomerQuery(name);
+    setSelectedCustomer(id);
+    setShowDropdown1(false);
+    onChange(id);
+  };
 
   return (
     <div className="">
-      {/* <h2 className="font-bold">Select Customer</h2> */}
       <div className="flex flex-col md:flex-row gap-4 w-full">
         {/* Customer */}
         <div className="relative w-full">
@@ -44,9 +51,8 @@ export default function CustomerDropdownInput({
             type="text"
             value={customerQuery}
             onChange={(e) => {
-              setcustomerQuery(e.target.value);
+              setCustomerQuery(e.target.value);
               setShowDropdown1(e.target.value.length > 0);
-              onChange(e.target.value)
             }}
             onBlur={() => setTimeout(() => setShowDropdown1(false), 200)}
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -62,7 +68,7 @@ export default function CustomerDropdownInput({
                   <li
                     key={item.id}
                     className="p-2 cursor-pointer hover:bg-blue-500 hover:text-white"
-                    onMouseDown={() => setcustomerQuery(item.name)}
+                    onMouseDown={() => handleSelectCustomer(item.id, item.name)}
                   >
                     {item.name}
                   </li>
@@ -73,6 +79,5 @@ export default function CustomerDropdownInput({
         </div>
       </div>
     </div>
-
   );
 }

@@ -2,7 +2,7 @@ import { fetchLoan } from '@/app/lib/data';
 import Pagination from './pagination';
 import { DeleteLoan, UpdateLoan } from './buttons';
 
-export default async function CustomersTable({
+export default async function LoanTable({
   query,
   currentPage,
   pageSize = 5,
@@ -12,7 +12,7 @@ export default async function CustomersTable({
   pageSize?: number;
 }) {
   const payload = { query, currentPage, pageSize }
-  const { totalLoan, loan } = await fetchLoan(payload);
+  const { totalLoan, loan }: { totalLoan: number; loan: { id: string; generate_id: string; customer?: { name: string }; user_loan_agent_1Touser?: { name: string }; user_loan_agent_2Touser?: { name: string }; deposit_amount: number | null }[] } = await fetchLoan(payload);
   const paginationNo = Math.ceil(totalLoan / pageSize);
 
   return (
@@ -31,7 +31,16 @@ export default async function CustomersTable({
                       ID
                     </th>
                     <th scope="col" className="px-3 py-5 font-mediums">
-                      principal_amount
+                      customer name
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-mediums">
+                      First Agent
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-mediums">
+                      Second Agent
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-mediums">
+                      Deposit Amount
                     </th>
                     <th scope="col" className="px-3 py-5 font-mediums">
                       ...
@@ -50,7 +59,25 @@ export default async function CustomersTable({
 
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
-                          <p>{x.principal_amount}</p>
+                          <p>{x.customer?.name}</p>
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-center gap-3">
+                          <p>{x.user_loan_agent_1Touser?.name}</p>
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-center gap-3">
+                          <p>{x.user_loan_agent_2Touser?.name}</p>
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-center gap-3">
+                          <p>{x.deposit_amount}</p>
                         </div>
                       </td>
 

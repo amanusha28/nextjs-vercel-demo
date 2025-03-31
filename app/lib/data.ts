@@ -145,17 +145,32 @@ export async function fetchLoan(payload: {
       where: {
         created_by: session?.user.id,
         deleted_at: null,
-        // OR: [
-        //   { name: { contains: query, mode: 'insensitive' } },
-        //   { ic: { contains: query, mode: 'insensitive' } },
-        //   { passport: { contains: query, mode: 'insensitive' } },
-        // ]
+      },
+      include: {
+        customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        user_loan_agent_1Touser: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        user_loan_agent_2Touser: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       skip,
       take: pageSize,
     });
 
-    const totalLoan = await prisma.customer.count({
+    const totalLoan = await prisma.loan.count({
       where: {
         deleted_at: null,
         // OR: [
@@ -165,10 +180,24 @@ export async function fetchLoan(payload: {
         // ]
       },
     });
-
+    console.log({ totalLoan, loan })
     return { totalLoan, loan };
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
+    throw new Error('Failed to fetch all loan.');
+  }
+}
+
+export async function fetchLoanById(id: string) {
+
+  try {
+    const customer = await prisma.loan.findUnique({
+      where: { id },
+    });
+
+    return customer;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch the customer.');
   }
 }

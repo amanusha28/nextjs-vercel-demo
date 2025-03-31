@@ -64,7 +64,7 @@ export const loanFormValidation = z.object({
 	loan_remark: z.string().optional().nullable(),
 	unit_of_date: z.string().optional().nullable(),
 	generate_id: z.string().optional().nullable(),
-	repayment_term: z.string().optional().nullable(),
+	repayment_term: z.number().optional().nullable(),
 	status: z.string().optional().nullable(),
 	amount_given: z.number().optional().nullable(),
 	interest_amount: z.number().optional().nullable(),

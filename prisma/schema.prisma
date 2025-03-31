@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,81 +7,86 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model customer {
+  id               String    @id(map: "customer_pk") @db.Uuid
+  generate_id      String?   @db.VarChar
+  gender           String?   @db.VarChar(255)
+  ic               String?   @unique @db.VarChar(255)
+  name             String?   @db.VarChar(255)
+  passport         String?   @unique @db.VarChar(255)
+  race             String?   @db.VarChar(255)
+  deleted_at       DateTime?
+  bank_details     Json?
+  customer_address Json?
+  employment       Json?
+  relations        Json?
+  supervisor       String?   @db.Uuid
+  car_plate        String?   @db.VarChar(255)
+  marital_status   String?   @db.VarChar(255)
+  mobile_no        String?   @db.VarChar(255)
+  no_of_child      Int?
+  tel_code         String?   @db.VarChar(255)
+  tel_no           String?   @db.VarChar(255)
+  status           String?   @db.VarChar(255)
+  remarks          Json?
+  created_by       String?   @db.Uuid
+  document         Json?
+  loan             loan[]
+}
+
+model loan {
+  id                      String    @id(map: "loan_pk") @db.Uuid
+  customer_id             String?   @db.Uuid
+  created_by              String?   @db.Uuid
+  loan_remark             String?   @db.VarChar(255)
+  generate_id             String    @db.VarChar
+  status                  String?   @db.VarChar(255)
+  agent_1                 String?   @db.Uuid
+  agent_2                 String?   @db.Uuid
+  created_at              DateTime  @default(now()) @db.Timestamp(6)
+  unit_period             String?
+  repayment_date          String?
+  principal_amount        Float?
+  deposit_amount          Float?
+  application_fee         Float?
+  interest                Float?
+  date_period             Int?
+  repayment_term          Int?
+  amount_given            Float?
+  interest_amount         Float?
+  payment_per_term        Float?
+  deleted_at              DateTime?
+  customer                customer? @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "loan_customer_fk")
+  user_loan_agent_1Touser user?     @relation("loan_agent_1Touser", fields: [agent_1], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "loan_user_fk")
+  user_loan_agent_2Touser user?     @relation("loan_agent_2Touser", fields: [agent_2], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "loan_user_fk_1")
+}
+
+model tracker {
+  id         String @id(map: "tracker_pk") @db.Uuid
+  category   String
+  year       Int
+  lastNumber Int
+
+  @@unique([category, year])
+}
+
+model user {
+  id                      String    @id @db.Uuid
+  email                   String    @unique @db.VarChar(255)
+  password                String?   @db.VarChar(255)
+  created_at              DateTime  @default(now()) @db.Timestamp(6)
+  role                    Role?     @default(AGENT)
+  supervisor              String?   @db.Uuid
+  name                    String?   @db.VarChar(255)
+  generate_id             String?   @db.VarChar
+  deleted_at              DateTime? @db.Timestamp(6)
+  loan_loan_agent_1Touser loan[]    @relation("loan_agent_1Touser")
+  loan_loan_agent_2Touser loan[]    @relation("loan_agent_2Touser")
+}
+
 enum Role {
   ADMIN
   LEAD
   AGENT
   SUPER_ADMIN
 }
-
-model tracker {
-  id         String @id(map: "tracker_pk") @default(uuid()) @db.Uuid
-  category   String // 'loan', 'customer', 'user', etc.
-  year       Int    // Year of tracking
-  lastNumber Int    // Last used running number for the given category, year, and month
-  @@unique([category, year]) // Ensure one record per category, year, and month
-}
-
-model user {
-  id               String   @id @default(uuid()) @db.Uuid
-  email            String   @unique @db.VarChar(255)
-  password         String?  @db.VarChar(255)
-  created_at       DateTime @default(now()) @db.Timestamp(6)
-  role             Role?    @default(AGENT)
-  supervisor       String?  @db.Uuid
-  name             String?  @db.VarChar(255)
-  generate_id      String?  @db.VarChar
-  deleted_at       DateTime? @db.Timestamp(6)
-
-}
-
-model customer {
-  id               String     @id(map: "customer_pk") @default(uuid()) @db.Uuid
-  generate_id      String?    @db.VarChar
-  name             String?    @db.VarChar(255)
-  ic               String?    @db.VarChar(255) @unique
-  passport         String?    @db.VarChar(255) @unique
-  gender           String?    @db.VarChar(255)
-  race             String?    @db.VarChar(255)
-  deleted_at       DateTime?
-  bank_details     Json?
-  customer_address Json?
-  employment       Json?
-  relations        Json?
-  supervisor       String?    @db.Uuid
-  car_plate        String?    @db.VarChar(255)
-  marital_status   String?    @db.VarChar(255)
-  mobile_no        String?    @db.VarChar(255)
-  no_of_child      Int?
-  tel_code         String?    @db.VarChar(255)
-  tel_no           String?    @db.VarChar(255)
-  status           String?    @db.VarChar(255)
-  remarks          Json?
-  created_by       String?    @db.Uuid
-  document         Json?
-}
-
-model loan {
-  id          String   @id(map: "loan_pk") @default(uuid()) @db.Uuid
-  generate_id String   @db.VarChar
-  agent_1           String?    @db.Uuid
-  agent_2           String?    @db.Uuid
-  customer_id       String?    @db.Uuid
-  principal_amount  Float?
-  deposit_amount    Float?
-  application_fee   Float?
-  repayment_date    DateTime?
-  unit_period       Int?
-  date_period       Int?
-  repayment_term    Int?
-  interest          Float?
-  amount_given      Float?
-  interest_amount      Float?
-  payment_per_term  Float?
-  loan_remark       String?    @db.VarChar(255)
-  status            String?    @db.VarChar(255)
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  created_by  String?  @db.Uuid
-  deleted_at  DateTime?
-}
-

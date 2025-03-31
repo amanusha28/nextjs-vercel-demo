@@ -9,7 +9,6 @@ import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 
-import { cookies } from "next/headers";
 import { auth } from "@/auth"
 
 
@@ -40,7 +39,7 @@ export async function authenticate(
  */
 
 export async function getAllAgent() {
-	
+
 }
 
 
@@ -257,24 +256,24 @@ export async function checkUniqueConstraint(col: string, val: string) {
 
 interface LoanFormData {
 	customer_id?: string;
-	repayment_date?: string;
-	principal_amount?: number;
-	deposit_amount?: number;
-	application_fee?: number;
-	interest?: number;
-	remark?: string;
+	repayment_date?: string | null;
+	principal_amount?: number | null;
+	deposit_amount?: number | null;
+	application_fee?: number | null;
+	interest?: number | null;
+	remark?: string | null;
 	created_by?: string;
-	supervisor?: string;
-	supervisor_2?: string;
-	date_period?: string;
-	loan_remark?: string;
-	unit_of_date?: string;
-	generate_id?: string;
-	repayment_term?: string;
-	status?: string;
-	amount_given?: number;
-	interest_amount?: number;
-	payment_per_term?: number;
+	supervisor?: string | null;
+	supervisor_2?: string | null;
+	date_period?: number | null; // Changed from string to match LoanData
+	loan_remark?: string | null;
+	unit_period?: number | null; // Renamed to match LoanData
+	generate_id?: string | null;
+	repayment_term?: number | null;
+	status?: string | null;
+	amount_given?: number | null;
+	interest_amount?: number | null;
+	payment_per_term?: number | null;
 }
 
 // Soft Delete Loan
@@ -294,8 +293,27 @@ export async function updateLoan(id: string, formData: LoanFormData) {
 	console.log(id, formData);
 }
 
-export async function createLoan( formData: LoanFormData) {
+export async function createLoan(formData: LoanFormData) {
+	const session = await auth()
+	console.log(session)
 	console.log('createLoan createLoan createLoan createLoan')
-	console.log(formData);
+	console.log({ ...formData, created_by: session?.user.id });
+	await prisma.loan.create({
+		data: {
+			...formData,
+			generate_id: formData.generate_id ?? '', // Ensure it's a string
+			created_by: session?.user.id,
+			principal_amount: formData.principal_amount ?? null,
+			deposit_amount: formData.deposit_amount ?? null,
+			application_fee: formData.application_fee ?? null,
+			interest: formData.interest !== undefined ? Number(formData.interest) : null,
+			amount_given: formData.amount_given ?? null,
+			interest_amount: formData.interest_amount !== undefined ? Number(formData.interest_amount) : null,
+			payment_per_term: formData.payment_per_term ?? null,
+			date_period: formData.unit_period ? Number(formData.unit_period) : null,
+			unit_period: formData.unit_period !== undefined && formData.unit_period !== null ? String(formData.unit_period) : null,
+		},
+	});
+	revalidatePath('/dashboard/loan');
+	redirect('/dashboard/loan');
 }
-

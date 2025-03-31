@@ -8,10 +8,11 @@ import AgentDropdownInput from './agent-dropdown';
 import CustomerDropdownInput from './customer-dropdown';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { createLoan, fetchUniqueNumber } from "@/app/lib/actions";
 
 type LoanData = {
   id?: string;
-  generate_id?: string;
+  generate_id?: string | null;
   agent_1?: string | null;
   agent_2?: string | null;
   customer_id?: string | null;
@@ -19,8 +20,8 @@ type LoanData = {
   deposit_amount?: number | null;
   application_fee?: number | null;
   repayment_date?: string | null;
-  unit_period?: number | null;
-  date_period?: number | null;
+  unit_period?: string | null;  // Ensure consistent naming
+  date_period?: number | null;   // Match backend type
   repayment_term?: number | null;
   interest?: number | null;
   amount_given?: number | null;
@@ -29,8 +30,10 @@ type LoanData = {
   loan_remark?: string | null;
   status?: string | null;
   created_at?: string;
-  created_by?: string | null;
-  [key: string]: any; // Allow additional dynamic properties
+  created_by?: string;
+  supervisor?: string | null;
+  supervisor_2?: string | null;
+  [key: string]: any;
 };
 
 
@@ -38,10 +41,13 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
   const [errors, setErrors] = useState<Record<any, any>>({}); // Initialize errors state
   const [formData, setFormData] = useState<LoanData>({
     ...loan,
-    repayment_date: loan?.repayment_date || "",
+    repayment_date: loan?.repayment_date || null, // Ensuring consistency
     agent_1: loan?.agent_1 || null,
     agent_2: loan?.agent_2 || null,
     customer_id: loan?.customer_id || null,
+    unit_period: loan?.unit_period || null, // Ensuring type consistency
+    date_period: loan?.date_period || null, // Ensuring type consistency
+    repayment_term: loan?.repayment_term || null, // Ensuring type consistency
   });
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     loan?.repayment_date ? new Date(loan.repayment_date) : null
@@ -50,15 +56,57 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
   const handleDropdownChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  
+  // Function to update calculated values
+  const updateCalculatedValues = () => {
+    const principal_amount = formData.principal_amount ?? 0;
+    const deposit_amount = formData.deposit_amount ?? 0;
+    const application_fee = formData.application_fee ?? 0;
+    const interest = formData.interest ?? 0;
+    const repayment_term = formData.repayment_term ?? 0;
+  
+    if (repayment_term > 0) {
+      const amount_given = principal_amount - deposit_amount - application_fee;
+      const interest_amount = principal_amount * (interest / 100) * repayment_term;
+      const payment_per_term = (principal_amount - deposit_amount) / repayment_term;
+  
+      setFormData((prev) => ({
+        ...prev,
+        amount_given,
+        interest_amount,
+        payment_per_term,
+      }));
+    }
   };
+  // Use useEffect to recalculate values when relevant form data changes
+  useEffect(() => {
+    updateCalculatedValues();
+  }, [formData.principal_amount, formData.deposit_amount, formData.application_fee, formData.interest, formData.repayment_term]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form Data:", formData);
+
+    if (loan?.id) {
+
+    }else {
+      // get custom id
+      const loId =await fetchUniqueNumber('LO');
+      const result = await createLoan({
+        ...formData,
+        principal_amount: formData.principal_amount ? Number(formData.principal_amount) : null,
+        deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : null,
+        application_fee: formData.application_fee ? Number(formData.application_fee) : null,
+        repayment_term: formData.repayment_term ? Number(formData.repayment_term) : null,
+        customer_id: formData.customer_id || undefined, // Ensure it's string or undefined
+        unit_period: formData.unit_period ? Number(formData.unit_period) : null, // Convert to number
+        generate_id: loId,
+      });
+      if (result) {
+        console.log('Loan Created')
+      }
+    }
     // Add API call logic here
   };
 
@@ -157,7 +205,7 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
 
               {/* repayment_date */}
               <div className="relative max-w-sm space-y-2">
-                <label htmlFor="income_date" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="repayment_date" className="block text-sm font-medium text-gray-700 mb-1">
                   Income Date
                 </label>
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -172,13 +220,13 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
                   </svg>
                 </div>
                 <DatePicker
-                  id="income_date"
+                  id="repayment_date"
                   selected={selectedDate}
                   onChange={(date) => {
                     setSelectedDate(date);
                     setFormData((prev) => ({
                       ...prev,
-                      income_date: date ? date.toISOString().split('T')[0] : '', // Save as YYYY-MM-DD
+                      repayment_date: date ? date.toISOString().split('T')[0] : '', // Save as YYYY-MM-DD
                     }));
                   }}
                   placeholderText="Select date"
@@ -244,7 +292,7 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
                 <input
                   id="repayment_term"
                   name="repayment_term"
-                  type="text"
+                  type="int"
                   placeholder="Repayment term"
                   value={formData?.repayment_term ?? ''}
                   onChange={(e) => {
@@ -375,7 +423,6 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
                   id="loan_remark"
                   name="loan_remark"
                   type="text"
-                  disabled
                   placeholder="Loan Remark"
                   value={formData?.loan_remark ?? ''}
                   onChange={(e) => {
