@@ -39,6 +39,9 @@ type LoanData = {
 
 export default function LoanForm({ loan }: { loan?: any | null }) {
   const [errors, setErrors] = useState<Record<any, any>>({}); // Initialize errors state
+
+  const [isDisabled, setIsDisabled] = useState(false);
+
   const [formData, setFormData] = useState<LoanData>({
     ...loan,
     repayment_date: loan?.repayment_date || null, // Ensuring consistency
@@ -86,6 +89,14 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsDisabled(true); // Disable the button after submission
+
+    // Simulate an async operation (e.g., API call)
+    setTimeout(() => {
+      console.log('Form submitted successfully!');
+      setIsDisabled(false); // Re-enable the button after completion
+    }, 3000); // Example delay of 3 seconds
+
     console.log("Form Data:", formData);
     delete formData.customer
     delete formData.user_loan_agent_1Touser
@@ -477,7 +488,7 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
           >
             Cancel
           </Link>
-          <Button type="submit" form="customerForm">Save Loan</Button>
+          <Button type="submit" form="customerForm"  disabled={isDisabled}>{isDisabled ? 'Submitting...' : 'Save Loan'}</Button>
         </div>
       </div>
     </form>
