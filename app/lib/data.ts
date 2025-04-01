@@ -136,15 +136,15 @@ export async function fetchLoan(payload: {
   const { query, currentPage, pageSize } = payload;
   try {
     const session = await auth()
-    // console.log(session)
-
-    // console.log('Fetching customers with query:', query);
     const skip = (currentPage - 1) * pageSize;
 
     const loan = await prisma.loan.findMany({
       where: {
         created_by: session?.user.id,
         deleted_at: null,
+        OR: [
+          { generate_id: { contains: query, mode: 'insensitive' } },
+        ]
       },
       include: {
         customer: {
@@ -168,6 +168,9 @@ export async function fetchLoan(payload: {
       },
       skip,
       take: pageSize,
+      orderBy: {
+        created_at: 'desc', // Sort by createdAt in descending order
+      },
     });
 
     const totalLoan = await prisma.loan.count({

@@ -334,52 +334,69 @@ export async function deleteLoan(id: string) {
 }
 
 export async function createLoan(formData: LoanFormData) {
-	const session = await auth()
-	// console.log(session)
-	// console.log('createLoan createLoan createLoan createLoan')
-	// console.log({ ...formData, created_by: session?.user.id });
+	const session = await auth();
+
+	// Ensure loan generate_id is assigned
 	if (!formData.generate_id) {
-		formData.generate_id = await fetchUniqueNumber('LN'); // Ensure generate_id is provided
+		formData.generate_id = await fetchUniqueNumber('LN');
 	}
 
 	const loanData = {
 		...formData,
-		generate_id: formData.generate_id, // Ensure generate_id is always defined
+		generate_id: formData.generate_id,
 		created_by: session?.user.id,
 	};
 
 	const loanDataRes = await prisma.loan.create({
 		data: loanData,
 	});
-	console.log('#######################################')
-	console.log(
-		formData.repayment_date ?? '',
-		formData.unit_period ?? '',
-		formData.date_period ? Number(formData.date_period): 0,
-		formData.repayment_term ? Number(formData.repayment_term): 0,
-	);
+
+	// Calculate repayment dates
 	const calculateRepaymentDates = await getInstallmentDates(
 		formData.repayment_date ?? '',
 		formData.unit_period ?? '',
-		formData.date_period ? Number(formData.date_period): 0,
-		formData.repayment_term ? Number(formData.repayment_term): 0,
-	)
+		formData.date_period ? Number(formData.date_period) : 0,
+		formData.repayment_term ? Number(formData.repayment_term) : 0
+	);
 
-	calculateRepaymentDates.map(async (date, index) => {
-        const generateId = await fetchUniqueNumber('IN');
-        await prisma.installment.create({
-          data: {
-            generate_id: generateId,
-            installment_date: date,
-            loan: { connect: { id: loanDataRes.id } },
-          },
-        });
-      })
+	// Fetch unique IDs in parallel before creating installments
+	const installmentIds = await Promise.all(
+		calculateRepaymentDates.map(() => fetchUniqueNumber('IN'))
+	);
 
-	// console.log(calculateRepaymentDates)
+	// Create installments in parallel
+	await Promise.all(
+		calculateRepaymentDates.map((date, index) => 
+			prisma.installment.create({
+				data: {
+					generate_id: installmentIds[index], // Ensure unique ID
+					installment_date: date,
+					loan: { connect: { id: loanDataRes.id } },
+				},
+			})
+		)
+	);
+
+	// Ensure a unique generate_id for payment
+	const generatePayId = await fetchUniqueNumber('PAY');
+
+	await prisma.payment.create({
+		data: {
+			type: 'Out',
+			generate_id: generatePayId,
+			payment_date: formData.repayment_date,
+			amount: formData.amount_given?.toString(),
+			balance: formData.amount_given?.toString(),
+			account_details: 'Loan Disbursement',
+			loan: { connect: { id: loanDataRes.id } },
+		},
+	});
+
+	// Refresh and redirect
 	revalidatePath('/dashboard/loan');
 	redirect('/dashboard/loan');
 }
+
 
 export async function updateLoan(id: string, formData: LoanFormData) {
 	const session = await auth()
@@ -430,6 +447,84 @@ export async function getInstallmentDates(
 	return dates;
 }
 
+/**
+ * ###############################################
+ *              Installment Data
+ * ###############################################
+ */
+interface Installment {
+	id?: string;
+	generate_id?: string;
+	installment_date: string;
+	due_amount: string;
+	receiving_date: string;
+	accepted_amount: string;
+	status?: string;
+}
+interface Payment {
+	id?: string;
+	generate_id?: string;
+	type?: string;
+	installment_id?: any;
+	payment_date?: string;
+	amount?: string;
+	balance?: string;
+	account_details?: string;
+	loan_id?: any;
+}
+export async function updateOrCreateInstallment(payload: Installment[], loanId: string) {
+	payload.map(async (x) => {
+		console.log(x.id);
+		if (!x.id) {
+			await prisma.installment.create({
+				data: { ...x, loan_id: loanId }
+			})
+		} else {
+			await prisma.installment.update({
+				where: { id: x.id },
+				data: { ...x }
+			})
+		}
+	})
+}
+
+export async function updateOrCreatePayment(payload: Payment[], loanId: string) {
+	await Promise.all(
+		payload.map(async (x) => {
+			if (x.id) {
+				// Update existing record
+				return await prisma.payment.update({
+					where: { id: x.id },
+					data: {
+						type: x.type || 'In',
+						installment_id: x.installment_id,
+						payment_date: x.payment_date,
+						amount: x.amount,
+						balance: x.balance,
+						account_details: x.account_details,
+						loan_id: x.loan_id,
+						generate_id: x.generate_id,
+					}
+				});
+			} else {
+				// Create new record
+				return await prisma.payment.create({
+					data: {
+						type: x.type || 'In',
+						installment_id: x.installment_id,
+						payment_date: x.payment_date,
+						amount: x.amount,
+						balance: x.balance,
+						account_details: x.account_details,
+						loan_id: loanId, // Ensure loanId is passed correctly
+						generate_id: x.generate_id,
+					}
+				});
+			}
+		})
+	);
+}
+
 
 
 /**
@@ -457,8 +552,16 @@ export async function fetchCity() {
  * ###############################################
  */
 
-export async function getLoanInstallment(loan_id:string) {
+export async function getLoanInstallment(loan_id: string) {
 	return await prisma.installment.findMany({
+		where: {
+			loan_id: loan_id
+		}
+	})
+}
+
+export async function getPaymentData(loan_id: string) {
+	return await prisma.payment.findMany({
 		where: {
 			loan_id: loan_id
 		}

@@ -41,6 +41,7 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
   const [errors, setErrors] = useState<Record<any, any>>({}); // Initialize errors state
 
   const [isDisabled, setIsDisabled] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<LoanData>({
     ...loan,
@@ -92,12 +93,11 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
     setIsDisabled(true); // Disable the button after submission
 
     // Simulate an async operation (e.g., API call)
-    setTimeout(() => {
-      console.log('Form submitted successfully!');
-      setIsDisabled(false); // Re-enable the button after completion
-    }, 3000); // Example delay of 3 seconds
+    // setTimeout(() => {
+    //   console.log('Form submitted successfully!');
+    //   setIsDisabled(false); // Re-enable the button after completion
+    // }, 3000); // Example delay of 3 seconds
 
-    console.log("Form Data:", formData);
     delete formData.customer
     delete formData.user_loan_agent_1Touser
     delete formData.user_loan_agent_2Touser
@@ -110,11 +110,10 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
       // get custom id
       const loId =await fetchUniqueNumber('LO');
       const result = await createLoan({...formData, generate_id: loId});
-      // if (result) {
-        console.log('Loan Created', result)
-      // }
+      console.log('Loan Created', result)
     }
-    // Add API call logic here
+    setSuccessMessage("Loan Created!");
+    setIsDisabled(false)
   };
 
 
@@ -480,6 +479,12 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
             </div>
           </div>
         </div>
+        {/* Success Message */}
+				{successMessage && (
+					<div className="mb-4 rounded-lg bg-green-100 p-3 text-green-700">
+						{successMessage}
+					</div>
+				)}
         {/* Submit Button Outside Tabs */}
         <div className="mt-6 flex justify-end gap-4">
           <Link

@@ -11,36 +11,39 @@ interface Loan {
   user_loan_agent_1Touser: agentType | null;
   user_loan_agent_2Touser: agentType | null;
 }
+
 interface customer {
   id: string;
   name: string | null;
 }
+
 interface agentType {
   id: string;
   name: string | null;
 }
 
-export default function LoanSearchDropdownInput({
-  onChange
-}: {
-  onChange: (loanData: string) => void;
-}) {
+interface LoanSearchDropdownInputProps {
+  onChange: (loanId: string) => void;
+}
+
+export default function LoanSearchDropdownInput({ onChange }: LoanSearchDropdownInputProps) {
   const [loanQuery, setLoanQuery] = useState("");
-  const [showDropdown1, setShowDropdown1] = useState(false);
-  const [data, setData] = useState<Loan[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [loans, setLoans] = useState<Loan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
 
   useEffect(() => {
-    async function loadLoan() {
+    const loadLoans = async () => {
+      setIsLoading(true);
       try {
         const { loan } = await fetchLoan({
           query: loanQuery,
           currentPage: 1,
           pageSize: 50,
         });
-        console.log(loan);
-        setData(
+
+        setLoans(
           loan.map((l: Loan) => ({
             id: l.id,
             generate_id: l.generate_id || "",
@@ -53,66 +56,63 @@ export default function LoanSearchDropdownInput({
       } catch (error) {
         console.error("Error fetching loan:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
-    }
-    loadLoan();
-  }, []);
+    };
 
-  const handleSelectLoan = (id: string, generate_id: string) => {
-    const loan = data.find((item) => item.id === id);
-    if (loan) {
-      setSelectedLoan(loan);
-    }
-    setLoanQuery(generate_id);
-    setShowDropdown1(false);
-    onChange(id); // To return id
-    // onChange(loan);
+    loadLoans();
+  }, [loanQuery]);
+
+  const handleSelectLoan = (loan: Loan) => {
+    setSelectedLoan(loan);
+    setLoanQuery(loan.generate_id);
+    setShowDropdown(false);
+    onChange(loan.id);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Loan Section */}
-      <div className="w-full">
-        <label htmlFor="generate_id" className="mb-2 block text-sm font-medium">
+    <div>
+      <div className="relative">
+        <label htmlFor="loanSearch" className="block text-sm font-medium text-gray-700">
           Loan
         </label>
-        <div className="relative w-full">
-          <input
-            type="text"
-            value={loanQuery}
-            onChange={(e) => {
-              setLoanQuery(e.target.value);
-              setShowDropdown1(e.target.value.length > 0);
-            }}
-            onBlur={() => setTimeout(() => setShowDropdown1(false), 200)}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Search..."
-          />
-          {loading ? (
-            <p className="text-gray-500 mt-1">Loading...</p>
-          ) : (
-            showDropdown1 &&
-            data.length > 0 && (
-              <ul className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-auto">
-                {data.map((item) => (
-                  <li
-                    key={item.id}
-                    className="p-2 cursor-pointer hover:bg-blue-500 hover:text-white"
-                    onMouseDown={() => handleSelectLoan(item.id, item.generate_id)}
-                  >
-                    {item.generate_id}
-                  </li>
-                ))}
-              </ul>
-            )
-          )}
-        </div>
-      </div>
+        <input
+          type="text"
+          id="loanSearch"
+          value={loanQuery}
+          onChange={(e) => {
+            setLoanQuery(e.target.value);
+            setShowDropdown(e.target.value.length > 0);
+          }}
+          onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+          className="mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          placeholder="Search by Loan ID..."
+        />
 
-      {/* Divider */}
-      <div className="border-t border-gray-300"></div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 gap-y-6">
+        {isLoading && (
+          <div className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg">
+            <div className="p-2 text-gray-500">Loading...</div>
+          </div>
+        )}
+
+        {!isLoading && showDropdown && loans.length > 0 && (
+          <div className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-56 overflow-y-auto">
+            {loans.map((loan) => (
+              <button
+                key={loan.id}
+                onClick={() => handleSelectLoan(loan)}
+                className="w-full text-left p-2 hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+              >
+                <div className="font-semibold">{loan.generate_id}</div>
+                <div className="text-sm text-gray-500">
+                  Principal Amount: {loan.principal_amount} | Customer: {loan.customer?.name}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 gap-y-6 md-4">
 
         {/* Principal Amount */}
         <div className="w-full">
@@ -173,8 +173,9 @@ export default function LoanSearchDropdownInput({
             className="block w-full rounded-md border border-gray-300 py-2 px-3 text-sm outline-none bg-gray-100"
           />
         </div>
+
       </div>
     </div>
   );
-
 }
+
