@@ -100,7 +100,7 @@ export default function PaymentForm() {
 		console.log('Submitter Button ID:', submitter?.id);
 
 		// Handle the Customer Relations (Family & Guarantor) form
-		const newInstallmentId = await fetchUniqueNumber('IN');
+		const newInstallmentId = await fetchUniqueNumber('IN', 'installment');
 		if (submitter?.id === "addNewInstallment") {
 			console.log('editId ->', editId)
 			if (editId !== null) {
@@ -116,7 +116,7 @@ export default function PaymentForm() {
 		}
 
 		if (submitter.id === 'addPaymentData') {
-			const newPaymentId = await fetchUniqueNumber('PAY');
+			const newPaymentId = await fetchUniqueNumber('PAY', 'payment');
 
 			const newPayment = {
 					...paymentformData,

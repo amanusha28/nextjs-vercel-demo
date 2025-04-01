@@ -129,9 +129,25 @@ interface CustomerFormData {
 }
 
 
-export async function fetchUniqueNumber(category: string) {
-	const generate_rId = await generateUniqueNumber(category);
-	return generate_rId;
+function generateRandomNumber(prefix: string): string {
+	return `${prefix}${Math.floor(Math.random() * 900000 + 100000).toString().toUpperCase()}`;
+}
+
+export async function fetchUniqueNumber(prefix: string, model: any) {
+	// if (model) {
+	const randomNumber = generateRandomNumber(prefix);
+	// Assuming you have a database or storage to check for uniqueness
+	// This example uses Prisma for demonstration
+	// const existingRecord = await prisma.[model].findFirst({
+	// 	where: { generate_id: randomNumber },
+	// });
+
+	// if (existingRecord) {
+	// 	return fetchUniqueNumber(prefix, model); // Recursively call until unique
+	// }
+
+	return randomNumber;
+	// }
 }
 
 
@@ -189,7 +205,7 @@ export async function transformPayload(formData: CustomerFormData) {
 	}
 
 	if (!formData.generate_id) {
-		const generate_id = await fetchUniqueNumber('CT');
+		const generate_id = await fetchUniqueNumber('CT', 'customer');
 		formData.generate_id = generate_id;
 	}
 
@@ -338,7 +354,7 @@ export async function createLoan(formData: LoanFormData) {
 
 	// Ensure loan generate_id is assigned
 	if (!formData.generate_id) {
-		formData.generate_id = await fetchUniqueNumber('LN');
+		formData.generate_id = await fetchUniqueNumber('LN', 'loan');
 	}
 
 	const loanData = {
@@ -359,26 +375,22 @@ export async function createLoan(formData: LoanFormData) {
 		formData.repayment_term ? Number(formData.repayment_term) : 0
 	);
 
-	// Fetch unique IDs in parallel before creating installments
-	const installmentIds = await Promise.all(
-		calculateRepaymentDates.map(() => fetchUniqueNumber('IN'))
-	);
-
 	// Create installments in parallel
 	await Promise.all(
-		calculateRepaymentDates.map((date, index) => 
-			prisma.installment.create({
+		calculateRepaymentDates.map(async (date) => {
+			const generateId = await fetchUniqueNumber('IN', 'installment');
+			return prisma.installment.create({
 				data: {
-					generate_id: installmentIds[index], // Ensure unique ID
+					generate_id: generateId, // Ensure unique ID
 					installment_date: date,
 					loan: { connect: { id: loanDataRes.id } },
 				},
-			})
-		)
+			});
+		})
 	);
 
 	// Ensure a unique generate_id for payment
-	const generatePayId = await fetchUniqueNumber('PAY');
+	const generatePayId = await fetchUniqueNumber('PAY', 'payment');
 
 	await prisma.payment.create({
 		data: {
@@ -396,7 +408,6 @@ export async function createLoan(formData: LoanFormData) {
 	revalidatePath('/dashboard/loan');
 	redirect('/dashboard/loan');
 }
-
 
 export async function updateLoan(id: string, formData: LoanFormData) {
 	const session = await auth()
@@ -491,39 +502,63 @@ export async function updateOrCreateInstallment(payload: Installment[], loanId: 
 export async function updateOrCreatePayment(payload: Payment[], loanId: string) {
 	await Promise.all(
 		payload.map(async (x) => {
-			if (x.id) {
-				// Update existing record
-				return await prisma.payment.update({
-					where: { id: x.id },
-					data: {
-						type: x.type || 'In',
-						installment_id: x.installment_id,
-						payment_date: x.payment_date,
-						amount: x.amount,
-						balance: x.balance,
-						account_details: x.account_details,
-						loan_id: x.loan_id,
-						generate_id: x.generate_id,
+			try {
+				if (x.id) {
+					// Update existing record
+					const payment = await prisma.payment.update({
+						where: { id: x.id },
+						data: {
+							type: x.type || 'In',
+							installment_id: x.installment_id,
+							payment_date: x.payment_date,
+							amount: x.amount,
+							balance: x.balance,
+							account_details: x.account_details,
+							loan_id: x.loan_id,
+							generate_id: x.generate_id,
+						}
+					});
+					console.log('Updated payment:', payment);
+				} else {
+					// Create new record
+					const newPayment = await prisma.payment.create({
+						data: {
+							type: x.type || 'In',
+							installment_id: x.installment_id,
+							payment_date: x.payment_date,
+							amount: x.amount,
+							balance: x.balance,
+							account_details: x.account_details,
+							loan_id: loanId, // Ensure loanId is passed correctly
+							generate_id: x.generate_id,
+						}
+					});
+					console.log('Created payment:', newPayment);
+				}
+				if(x.installment_id) {
+
+					try {
+						const updatedInstallment = await prisma.installment.update({
+							where: {
+								id: x.installment_id
+							},
+							data: {
+								receiving_date: x.payment_date,
+								accepted_amount: x.amount,
+							}
+						});
+						console.log('Updated installment:', updatedInstallment);
+					} catch (error) {
+						console.error('Error updating installment:', error);
 					}
-				});
-			} else {
-				// Create new record
-				return await prisma.payment.create({
-					data: {
-						type: x.type || 'In',
-						installment_id: x.installment_id,
-						payment_date: x.payment_date,
-						amount: x.amount,
-						balance: x.balance,
-						account_details: x.account_details,
-						loan_id: loanId, // Ensure loanId is passed correctly
-						generate_id: x.generate_id,
-					}
-				});
+				}
+			} catch (error) {
+				console.error('Error processing payment:', error);
 			}
 		})
 	);
 }
+
 
 
 
