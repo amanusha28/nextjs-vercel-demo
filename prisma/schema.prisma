@@ -59,6 +59,8 @@ model loan {
   customer                customer? @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "loan_customer_fk")
   user_loan_agent_1Touser user?     @relation("loan_agent_1Touser", fields: [agent_1], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "loan_user_fk")
   user_loan_agent_2Touser user?     @relation("loan_agent_2Touser", fields: [agent_2], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "loan_user_fk_1")
+  installment      installment[]
+  payment          payment[]
 }
 
 model tracker {
@@ -103,6 +105,33 @@ model city {
   name     String @db.VarChar(255)
   state_id String @db.Uuid
   state    state  @relation(fields: [state_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "city_state_fk")
+}
+
+model installment {
+  id               String    @id(map: "installment_pk") @default(uuid()) @db.Uuid
+  generate_id      String?   @db.VarChar
+  installment_date String?   @db.VarChar
+  due_amount       String?   @db.VarChar
+  receiving_date   String?   @db.VarChar
+  status           String?   @db.VarChar
+  loan_id          String?   @db.Uuid
+  accepted_amount  String?   @db.VarChar
+  loan             loan?     @relation(fields: [loan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "installment_loan_fk")
+  payment          payment[]
+}
+
+model payment {
+  generate_id     String?   @db.VarChar
+  id              String       @id(map: "payment_pk") @default(uuid()) @db.Uuid
+  type            String?      @db.VarChar
+  installment_id  String?      @db.Uuid
+  payment_date    String?      @db.VarChar
+  amount          String?      @db.VarChar
+  balance         String?      @db.VarChar
+  account_details String?      @db.VarChar
+  loan_id         String?      @db.Uuid
+  installment     installment? @relation(fields: [installment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "payment_installment_fk")
+  loan            loan?        @relation(fields: [loan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "payment_loan_fk")
 }
 
 enum Role {

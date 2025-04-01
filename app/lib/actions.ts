@@ -348,15 +348,35 @@ export async function createLoan(formData: LoanFormData) {
 		created_by: session?.user.id,
 	};
 
-	await prisma.loan.create({
+	const loanDataRes = await prisma.loan.create({
 		data: loanData,
 	});
+	console.log('#######################################')
 	console.log(
-		formData.repayment_date,
-		formData.date_period,
-		formData.date_period,
-		formData.repayment_term,
+		formData.repayment_date ?? '',
+		formData.unit_period ?? '',
+		formData.date_period ? Number(formData.date_period): 0,
+		formData.repayment_term ? Number(formData.repayment_term): 0,
 	);
+	const calculateRepaymentDates = await getInstallmentDates(
+		formData.repayment_date ?? '',
+		formData.unit_period ?? '',
+		formData.date_period ? Number(formData.date_period): 0,
+		formData.repayment_term ? Number(formData.repayment_term): 0,
+	)
+
+	calculateRepaymentDates.map(async (date, index) => {
+        const generateId = await fetchUniqueNumber('IN');
+        await prisma.installment.create({
+          data: {
+            generate_id: generateId,
+            installment_date: date,
+            loan: { connect: { id: loanDataRes.id } },
+          },
+        });
+      })
+
+	// console.log(calculateRepaymentDates)
 	revalidatePath('/dashboard/loan');
 	redirect('/dashboard/loan');
 }
@@ -428,4 +448,19 @@ export async function fetchState() {
 
 export async function fetchCity() {
 	return await prisma.city.findMany();
+}
+
+
+/**
+ * ###############################################
+ *                    Loan Data
+ * ###############################################
+ */
+
+export async function getLoanInstallment(loan_id:string) {
+	return await prisma.installment.findMany({
+		where: {
+			loan_id: loan_id
+		}
+	})
 }

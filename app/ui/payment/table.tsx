@@ -1,52 +1,31 @@
-import { fetchLoan } from '@/app/lib/data';
-import Pagination from './pagination';
-import { DeleteLoan, UpdateLoan } from './buttons';
-
-export default async function LoanTable({
-  query,
-  currentPage,
-  pageSize = 5,
-}: {
-  query: string;
-  currentPage: number;
-  pageSize?: number;
-}) {
-  const payload = { query, currentPage, pageSize }
-  const { totalLoan, loan }: { totalLoan: number; loan: { id: string; generate_id: string; customer?: { name: string | null } | null; user_loan_agent_1Touser?: { name: string | null } | null; user_loan_agent_2Touser?: { name: string | null } | null; deposit_amount: string | null }[] } = await fetchLoan(payload);
-
-  // Parse deposit_amount as a number during data transformation
-  const transformedLoan = loan.map((item) => ({
-    ...item,
-    deposit_amount: item.deposit_amount !== null ? parseFloat(item.deposit_amount) : null,
-  }));
-  const paginationNo = Math.ceil(totalLoan / pageSize);
-
+"use client"
+export default function InstallmentTable({ installmentData }: { installmentData: any }) {
   return (
     <div className="w-full">
       <div className="mt-6 flow-root">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
-              <div className="md:hidden">
-                {/* mobile table */}
-              </div>
               <table className="hidden min-w-full rounded-md text-gray-900 md:table">
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
                     <th scope="col" className="px-3 py-5 font-mediums">
-                      ID
+                      Installment id
                     </th>
                     <th scope="col" className="px-3 py-5 font-mediums">
-                      customer name
+                      Installment Date
                     </th>
                     <th scope="col" className="px-3 py-5 font-mediums">
-                      First Agent
+                      Due amount
                     </th>
                     <th scope="col" className="px-3 py-5 font-mediums">
-                      Second Agent
+                      Receiving Date
                     </th>
                     <th scope="col" className="px-3 py-5 font-mediums">
-                      Deposit Amount
+                      Status
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-mediums">
+                      Accepted amount
                     </th>
                     <th scope="col" className="px-3 py-5 font-mediums">
                       ...
@@ -55,7 +34,7 @@ export default async function LoanTable({
                 </thead>
 
                 <tbody className="divide-y divide-gray-200 text-gray-900">
-                  {loan.map((x) => (
+                  {installmentData.map((x:any) => (
                     <tr key={x.id} className="group">
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
@@ -65,32 +44,38 @@ export default async function LoanTable({
 
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
-                          <p>{x.customer?.name}</p>
+                          <p>{x.installment_date}</p>
                         </div>
                       </td>
 
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
-                          <p>{x.user_loan_agent_1Touser?.name}</p>
+                          <p>{x.due_amount}</p>
                         </div>
                       </td>
 
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
-                          <p>{x.user_loan_agent_2Touser?.name}</p>
+                          <p>{x.receiving_date}</p>
                         </div>
                       </td>
 
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
-                          <p>{x.deposit_amount}</p>
+                          <p>{x.status}</p>
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-center gap-3">
+                          <p>{x.accepted_amount}</p>
                         </div>
                       </td>
 
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                       <div className="flex items-center gap-3">
-                        <UpdateLoan id={x.id} />
-                        <DeleteLoan id={x.id} />
+                        {/* <UpdateInstallment row={x} />
+                        <DeleteInstallment row={x} /> */}
                       </div>
                       </td>
                       
@@ -101,9 +86,6 @@ export default async function LoanTable({
             </div>
           </div>
         </div>
-      </div>
-      <div className="mt-5 flex w-full justify-center">
-        <Pagination totalPages={paginationNo} />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { signOut, auth } from '@/auth';
 
 export default async function SideNav() {
   const session = await auth()
-	console.log('session data in Sidebar', session)
+	// console.log('session data in Sidebar', session)
   return (
     <div className="flex h-full flex-col px-3 py-4 md:px-2">
       <Link
