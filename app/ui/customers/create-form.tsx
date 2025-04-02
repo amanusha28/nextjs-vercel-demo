@@ -628,9 +628,11 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
             >
               <option value="">Select Status</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-              <option value="Suspended">Suspended</option>
+              <option value="Pending">Pending</option>
+              <option value="Potential">Potential</option>
+              <option value="Process">Process</option>
+              <option value="Success">Success</option>
+              <option value="Reject">Reject</option>
             </select>
           </div>
         </div>

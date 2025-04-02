@@ -1,8 +1,7 @@
 "use server"
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
 
 import { auth } from '@/auth';
+import prisma from './prisma';
 
 export async function generateUniqueNumber(category: string): Promise<string> {
   const now = new Date();
@@ -122,6 +121,83 @@ export async function fetchCustomerById(id: string) {
     throw new Error('Failed to fetch the customer.');
   }
 }
+
+export async function fetchCurrentUserCustomer(payload: { 
+  query: string; 
+  currentPage: number; 
+  pageSize: number; 
+}) {
+  const { query, currentPage, pageSize } = payload;
+
+  if (!query || query.trim() === '') {
+    return { data: [] };
+  }
+
+  try {
+    const session = await auth();
+
+    const currentDate = new Date().toISOString().split('T')[0]; // Returns "2025-04-02"
+
+    const customersWithMatchingLoans = await prisma.$queryRaw`
+      SELECT 
+        c.id AS customer_id, 
+        c.generate_id AS customer_generate_id, 
+        c.name AS customer_name, 
+        c.ic AS customer_ic, 
+        c.passport AS customer_passport, 
+        c.deleted_at AS customer_deleted_at,   
+        l.id AS loan_id, 
+        l.generate_id AS loan_generate_id, 
+        l.customer_id AS loan_customer_id, 
+        l.amount_given AS loan_amount, 
+        l.interest AS loan_interest_rate, 
+        l.status AS loan_status, 
+        l.agent_1 AS loan_agent_1_id, 
+        l.agent_2 AS loan_agent_2_id, 
+        i.generate_id AS installment_generate_id, 
+        i.loan_id AS installment_loan_id, 
+        i.due_amount AS installment_amount, 
+        i.installment_date AS installment_date, 
+        i.status AS installment_status,
+        -- Agent 1 Details
+        u1.id AS agent_1_id,
+        u1.name AS agent_1_name,
+        u1.email AS agent_1_email,
+        -- Agent 2 Details
+        u2.id AS agent_2_id,
+        u2.name AS agent_2_name,
+        u2.email AS agent_2_email
+        
+      FROM customer c
+      LEFT JOIN loan l ON c.id = l.customer_id
+      LEFT JOIN installment i ON l.id = i.loan_id 
+          AND i.installment_date::TEXT::DATE > ${currentDate}::DATE -- Fixes Date Binding
+      
+      -- Join Agent 1 (User)
+      LEFT JOIN "user" u1 ON l.agent_1 = u1.id
+
+      -- Join Agent 2 (User)
+      LEFT JOIN "user" u2 ON l.agent_2 = u2.id
+
+      WHERE c.deleted_at IS NULL
+        AND (
+            c.generate_id ILIKE ${'%' + query + '%'}
+            OR c.name ILIKE ${'%' + query + '%'}
+            OR c.ic ILIKE ${'%' + query + '%'}
+            OR c.passport ILIKE ${'%' + query + '%'}
+        )
+      ORDER BY i.installment_date DESC
+    `;
+
+    console.log('customersWithMatchingLoans', customersWithMatchingLoans);
+    
+    return { data: customersWithMatchingLoans || [] };
+  } catch (error) {
+    console.error('Error fetching customer data:', error);
+    return { data: [] };
+  }
+}
+
 
 
 /**

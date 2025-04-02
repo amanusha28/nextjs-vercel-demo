@@ -1,13 +1,12 @@
 "use server"
-import { PrismaClient } from "@prisma/client";
 import { generateUniqueNumber } from "./data";
-const prisma = new PrismaClient();
 import { customerFormValidation } from "./validation";
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn, signOut, auth } from '@/auth';
 import { AuthError } from 'next-auth';
 import bcrypt from "bcryptjs";
+import prisma from "./prisma";
 
 
 export async function authenticate(
