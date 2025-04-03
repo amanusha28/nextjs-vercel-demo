@@ -3,9 +3,13 @@ import NavLinks from '@/app/ui/dashboard/nav-links';
 import AcmeLogo from '@/app/ui/cs4season-logo';
 import { PowerIcon } from '@heroicons/react/24/outline';
 import { signOut, auth } from '@/auth';
+import { handleSignOut } from '@/app/lib/actions';
 
 export default async function SideNav() {
   const session = await auth()
+  if (!session) {
+    await handleSignOut()
+  }
 	// console.log('session data in Sidebar', session)
   return (
     <div className="flex h-full flex-col px-3 py-4 md:px-2">

@@ -108,7 +108,7 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
         console.log('Loan Created', result)
     }else {
       // get custom id
-      const loId =await fetchUniqueNumber('LO');
+      const loId =await fetchUniqueNumber('LO', 'loan');
       const result = await createLoan({...formData, generate_id: loId});
       console.log('Loan Created', result)
     }

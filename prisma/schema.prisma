@@ -82,6 +82,7 @@ model user {
   name                    String?   @db.VarChar(255)
   generate_id             String?   @db.VarChar
   deleted_at              DateTime? @db.Timestamp(6)
+  created_by              String?   @db.Uuid
   loan_loan_agent_1Touser loan[]    @relation("loan_agent_1Touser")
   loan_loan_agent_2Touser loan[]    @relation("loan_agent_2Touser")
 }

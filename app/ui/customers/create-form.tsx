@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Button } from '../button';
-import { createCustomer, updateCustomer, fetchUniqueNumber, fetchCountry, fetchState, fetchCity } from '@/app/lib/actions';
+import { createCustomer, updateCustomer, fetchUniqueNumber } from '@/app/lib/actions';
 import Link from 'next/link';
 // import { CustomerField } from '@/app/lib/definitions';
 import { customerFormValidation, transformError } from '@/app/lib/validation';
@@ -97,7 +97,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
 
   // File 
   const [file, setFile] = useState<File>();
-  const [url, setUrl] = useState("");
+  // const [url, setUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const uploadFile = async () => {
     try {
@@ -263,7 +263,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
     // console.log('Submitter Button ID:', submitter?.id);
 
     // Handle the Customer Relations (Family & Guarantor) form
-    const crId =await fetchUniqueNumber('CR');
+    const crId =await fetchUniqueNumber('CR', 'customer');
     if (submitter?.id === "addGuaranter") {
       await setFormData((prev) => ({
         ...prev,
@@ -289,7 +289,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
     }
 
     // Handle the Bank Details form
-    const cbId =await fetchUniqueNumber('CB');
+    const cbId =await fetchUniqueNumber('CB', 'bank');
     if (submitter?.id === "addBankDetails") {
       await setFormData((prev) => ({
         ...prev,

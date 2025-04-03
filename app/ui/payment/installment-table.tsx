@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import EditInstallment from './edit-installment';
-import DeleteInstallment from './delete-installment';
+// import EditInstallment from './edit-installment';
+// import DeleteInstallment from './delete-installment';
 
 interface Installment {
   id: number;
@@ -9,6 +9,7 @@ interface Installment {
   due_amount: string;
   receiving_date: string;
   accepted_amount: string;
+  status: string
 }
 
 interface InstallmentTableProps {
@@ -38,7 +39,12 @@ export default function InstallmentTable({ itData, onEdit, onDelete }: Installme
     }
 
     const handleSaveEdit = (id: number, formData: SaveEditFormData): void => {
-      onEdit(id, formData);
+      const updatedFormData = {
+        ...formData,
+        status: formData.status ?? "pending", // Default to "pending" if status is undefined
+      };
+    
+      onEdit(id, updatedFormData); // Pass the updated form data
       setEditingRow(null);
     };
   
@@ -157,7 +163,7 @@ export default function InstallmentTable({ itData, onEdit, onDelete }: Installme
                             ) : (
                               <button onClick={() => handleEdit(x)}>Edit</button>
                             )}
-                            <DeleteInstallment row={x} onDelete={onDelete} />
+                            {/* <DeleteInstallment row={x} onDelete={onDelete} /> */}
                           </div>
                         </td>
                       </tr>

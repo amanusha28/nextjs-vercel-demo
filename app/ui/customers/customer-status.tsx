@@ -1,6 +1,6 @@
 import { fetchCurrentUserCustomer } from '@/app/lib/data';
-import Pagination from './pagination';
-import { DeleteCustomer, UpdateCustomer } from './buttons';
+// import Pagination from './pagination';
+// import { DeleteCustomer, UpdateCustomer } from './buttons';
 
 export default async function CustomersStatusTable({
   query,
@@ -58,7 +58,7 @@ export default async function CustomersStatusTable({
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-gray-200 text-gray-900">
+                {/* <tbody className="divide-y divide-gray-200 text-gray-900">
                   {data.map((customer) => (
                     <tr key={customer.c_id} className="group">
                       
@@ -119,7 +119,8 @@ export default async function CustomersStatusTable({
                       
                     </tr>
                   ))}
-                </tbody>
+                </tbody> */}
+
               </table>
             </div>
           </div>

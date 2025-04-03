@@ -431,7 +431,7 @@ export async function getInstallmentDates(
 	repaymentTerm: number
 ): Promise<string[]> {
 	const dates: string[] = [];
-	let currentDate = new Date(startDate);
+	const currentDate = new Date(startDate);
 
 	for (let i = 0; i < repaymentTerm; i++) {
 		dates.push(currentDate.toISOString().split('T')[0]); // Formats date as YYYY-MM-DD

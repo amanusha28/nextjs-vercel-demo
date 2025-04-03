@@ -1,9 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { signOut } from 'next-auth/react';
+import React, { useState } from 'react';
 import { changePassword } from '@/app/lib/actions';
-import { redirect } from 'next/navigation';
 
 export default function ChangePasswordForm() {
   const [error, setError] = useState<string | null>(null);

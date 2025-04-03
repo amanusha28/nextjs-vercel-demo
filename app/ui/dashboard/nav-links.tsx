@@ -5,7 +5,8 @@ import {
   HomeIcon,
   DocumentCurrencyDollarIcon,
   CreditCardIcon,
-  KeyIcon
+  KeyIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -14,6 +15,7 @@ import clsx from 'clsx';
 // Main navigation links
 const links = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
+  { name: 'User', href: '/dashboard/user', icon: UserIcon },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
   { name: 'Customer Status', href: '/dashboard/customer-status', icon: UserGroupIcon },
   { name: 'Loan', href: '/dashboard/loan', icon: DocumentCurrencyDollarIcon },

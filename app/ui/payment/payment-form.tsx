@@ -87,6 +87,7 @@ export default function PaymentForm() {
 			]);
 			setLoanId(loan_id);
 			setInstallmentData(data);
+			console.log('paymentData->', _paymentData)
 			setPaymentData(_paymentData);
 		} catch (error) {
 			console.error("Error fetching installment or payment data:", error);
@@ -225,7 +226,7 @@ export default function PaymentForm() {
 										<label className="mb-2 block text-sm font-medium">Installment Date</label>
 										<DatePicker
 											placeholderText="Select date"
-											selected={formData.installment_date}
+											selected={(formData.installment_date != '') ? new Date(formData.installment_date): null}
 											onChange={(date) => setFormData({ ...formData, installment_date: date ? date.toISOString().split('T')[0] : '' })}
 											className="block w-full rounded-md border-gray-300 py-2 px-3 text-sm"
 										/>
@@ -356,7 +357,7 @@ export default function PaymentForm() {
 									<div>
 										<label className="mb-2 block text-sm font-medium">Payment Status</label>
 										<select
-											selected={selectedPaymentType}
+											// selected={selectedPaymentType}
 											onChange={(val) => setPaymentFormData({ ...paymentformData, type: val.target.value })}
 											className="block w-full rounded-md border-gray-300 py-2 px-3 text-sm"
 										>
@@ -370,7 +371,7 @@ export default function PaymentForm() {
 										<label className="mb-2 block text-sm font-medium">Payment Date</label>
 										<DatePicker
 											placeholderText="Select date"
-											selected={paymentformData.payment_date}
+											// selected={paymentformData.payment_date}
 											onChange={(val) => setPaymentFormData({ ...paymentformData, payment_date: val ? val.toISOString().split('T')[0] : '' })}
 											className="block w-full rounded-md border-gray-300 py-2 px-3 text-sm"
 										/>
@@ -378,12 +379,12 @@ export default function PaymentForm() {
 									<div>
 										<label className="mb-2 block text-sm font-medium">Installment Id</label>
 										<select
-											selected={selectedInstallmentId}
+											// selected={selectedInstallmentId}
 											onChange={(val) => setPaymentFormData({ ...paymentformData, installment_id: val.target.value })}									
 											className="block w-full rounded-md border-gray-300 py-2 px-3 text-sm"
 										>
 												<option >Select Installment Id</option>
-											{installmentData.map((val) => (
+											{installmentData.map((val: Installment) => (
 												<option key={val.id} value={val.id}>{val.generate_id}</option>
 											))}
 										</select>

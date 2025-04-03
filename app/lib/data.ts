@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import prisma from './prisma';
+import { handleSignOut } from './actions';
 
 export async function generateUniqueNumber(category: string): Promise<string> {
   const now = new Date();
@@ -57,6 +58,28 @@ export async function fetchAllAgent() {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all customers.');
   }
+}
+
+export async function getUsers(payload: { 
+  query: any; currentPage: number; pageSize: number; 
+}) {
+  // const { query, currentPage, pageSize } = payload;
+  const session = await auth();
+  if (!session) {
+    await handleSignOut();
+  }
+  const users = await prisma.user.findMany({
+    where: {
+      deleted_at: null,
+
+    }
+  })
+  const total = await prisma.user.count({
+    where: {
+      deleted_at: null
+    }
+  })
+  return { total: total, users: users }
 }
 
 /**
@@ -127,7 +150,7 @@ export async function fetchCurrentUserCustomer(payload: {
   currentPage: number; 
   pageSize: number; 
 }) {
-  const { query, currentPage, pageSize } = payload;
+  const { query } = payload;
 
   if (!query || query.trim() === '') {
     return { data: [] };
@@ -135,6 +158,9 @@ export async function fetchCurrentUserCustomer(payload: {
 
   try {
     const session = await auth();
+    if (!session) {
+      await handleSignOut()
+    }
 
     const currentDate = new Date().toISOString().split('T')[0]; // Returns "2025-04-02"
 
