@@ -9,7 +9,7 @@ export const customerFormValidation = z.object({
 	marital_status: z.string().optional().nullable(),
 	no_of_child: z.any().optional().nullable(),
 	car_plate: z.any().optional().nullable(),
-	mobile_no: z.string().optional().nullable(),
+	mobile_no: z.string().min(10, "Mobile No is required"),
 	status: z.string().optional().nullable(),
 	customer_address: z.object({}).optional().nullable(),
 	employment: z.object({}).optional().nullable(),
@@ -17,7 +17,13 @@ export const customerFormValidation = z.object({
 	bank_details: z.array(z.object({})).optional().nullable(),
 	document: z.array(z.object({})).optional().nullable(),
 	remarks: z.array(z.object({})).optional().nullable(),
-});
+}).refine(
+	(data) => data.ic || data.passport,
+	{
+		message: "Either IC or Passport is required",
+		path: ["ic", "passport"],
+	}
+);
 
 
 export function transformError(errorObject: any) {
@@ -43,7 +49,7 @@ export function transformError(errorObject: any) {
 			}
 		}
 	}
-
+	console.log('validationResult ============= ', formattedError);
 	return formattedError;
 }  
 

@@ -318,7 +318,7 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
     }
 
     const validationResult = customerFormValidation.safeParse(formData);
-    console.log('validationResult ============= ', validationResult);
+    // console.log('validationResult ============= ', validationResult);
     
     if (!validationResult.success) {
       setErrors(transformError(validationResult));
@@ -446,8 +446,8 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                 errors?.ic ? 'border-red-500' : 'border-gray-200'
               } py-2 px-3 text-sm outline-2 placeholder:text-gray-500`}
             />
-            {errors?.ic?.[0] && (
-              <p className="text-red-500 text-xs mt-1">{errors.ic[0]}</p>
+            {errors?.ic?.passport?.[0] && (
+              <p className="text-red-500 text-xs mt-1">{errors.ic.passport[0]}</p>
             )}
           </div>
 
@@ -469,11 +469,11 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                 }));
               }}
               className={`block w-full rounded-md border ${
-                errors?.passport ? 'border-red-500' : 'border-gray-200'
+                errors?.ic ? 'border-red-500' : 'border-gray-200'
               } py-2 px-3 text-sm outline-2 placeholder:text-gray-500`}
             />
-            {errors?.passport?.[0] && (
-              <p className="text-red-500 text-xs mt-1">{errors.passport[0]}</p>
+            {errors?.ic?.passport?.[0] && (
+              <p className="text-red-500 text-xs mt-1">{errors.ic.passport[0]}</p>
             )}
           </div>
 
@@ -606,8 +606,14 @@ export default function CustomerForm({ customers }: { customers?: any | null }) 
                 }));
               }}
               placeholder="Enter contact number"
-              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+              className={`block w-full rounded-md border ${
+                errors?.mobile_no ? 'border-red-500' : 'border-gray-200'
+              } py-2 px-3 text-sm outline-2 placeholder:text-gray-500`}
+              
             />
+            {errors?.mobile_no?.[0] && (
+              <p className="text-red-500 text-xs mt-1">{errors.mobile_no[0]}</p>
+            )}
           </div>
 
           {/* Status */}

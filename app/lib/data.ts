@@ -123,7 +123,59 @@ export async function fetchCustomers(payload: {
         ]
       },
     });
+    const customerIds = customers.map((customer: any) => customer.id);
 
+    const loanStatusCounts = await prisma.loan.groupBy({
+      by: ['customer_id', 'status'],
+      where: {
+      customer_id: { in: customerIds },
+      },
+      _count: {
+      status: true,
+      },
+    });
+
+    const statusMap = loanStatusCounts.reduce((acc: any, item: any) => {
+      if (!acc[item.customer_id]) {
+      acc[item.customer_id] = {
+        completedStatusCounts: 0,
+        normalStatusCounts: 0,
+        badDebtStatusCounts: 0,
+        badDebtCompletedStatusCounts: 0,
+      };
+      }
+      switch (item.status) {
+      case 'Completed':
+        acc[item.customer_id].completedStatusCounts = item._count.status;
+        break;
+      case 'Normal':
+        acc[item.customer_id].normalStatusCounts = item._count.status;
+        break;
+      case 'Bad Debt':
+        acc[item.customer_id].badDebtStatusCounts = item._count.status;
+        break;
+      case 'Bad Debt Completed':
+        acc[item.customer_id].badDebtCompletedStatusCounts = item._count.status;
+        break;
+      }
+      return acc;
+    }, {});
+
+    customers.forEach((customer: any) => {
+      const counts = statusMap[customer.id] || {
+        completedStatusCounts: 0,
+      normalStatusCounts: 0,
+      badDebtStatusCounts: 0,
+      badDebtCompletedStatusCounts: 0,
+      };
+      customer.completedStatusCounts = counts.completedStatusCounts;
+      customer.normalStatusCounts = counts.normalStatusCounts;
+      customer.badDebtStatusCounts = counts.badDebtStatusCounts;
+      customer.badDebtCompletedStatusCounts = counts.badDebtCompletedStatusCounts;
+    });
+    console.log('customerscustomerscustomerscustomerscustomers');
+    console.log(customers);
+    console.log('customerscustomerscustomerscustomerscustomerscustomers');
     return { totalCustomer, customers };
   } catch (err) {
     console.error('Database Error:', err);

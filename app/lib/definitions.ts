@@ -27,6 +27,10 @@ export type Customer = {
   tel_code: string | null;
   tel_no: string | null;
   status: string | null;
+  normalStatusCounts?: number | string;
+	completedStatusCounts?: number | string;
+	badDebtStatusCounts?: number | string;
+	badDebtCompletedStatusCounts?: number | string;
 };
 
 export type CustomersTableType = {
@@ -43,6 +47,10 @@ export type CustomersTableType = {
   tel_code: string | null;
   tel_no: string | null;
   status: string | null;
+  normalStatusCounts?: number | string;
+	completedStatusCounts?: number | string;
+	badDebtStatusCounts?: number | string;
+	badDebtCompletedStatusCounts?: number | string;
 };
 
 export type FormattedCustomersTable = {
@@ -59,6 +67,10 @@ export type FormattedCustomersTable = {
   tel_code: string | null;
   tel_no: string | null;
   status: string | null;
+  normalStatusCounts?: number | string;
+	completedStatusCounts?: number | string;
+	badDebtStatusCounts?: number | string;
+	badDebtCompletedStatusCounts?: number | string;
 };
 
 export type CustomerField = {
@@ -82,4 +94,8 @@ export type CustomerField = {
   bank_details?: Record<string, any>[]; 
   document?: Record<string, any>[]; 
   // remarks?: Record<string, any>[]; 
+  normalStatusCounts?: number | string;
+	completedStatusCounts?: number | string;
+	badDebtStatusCounts?: number | string;
+	badDebtCompletedStatusCounts?: number | string;
 };

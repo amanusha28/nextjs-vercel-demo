@@ -470,6 +470,7 @@ export default function LoanForm({ loan }: { loan?: any | null }) {
                   className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
                 >
                   <option value="">Select Status</option>
+                  <option value="completed">Completed</option>
                   <option value="normal">Normal</option>
                   <option value="bad_debt">Bad Debt</option>
                   <option value="bad_debt_completed">Bad Debt Completed</option>

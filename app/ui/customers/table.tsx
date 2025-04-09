@@ -40,13 +40,25 @@ export default async function CustomersTable({
                       Passport
                     </th>
                     <th scope="col" className="px-3 py-5 font-mediums">
+                      On Going No
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-mediums">
+                      Completed
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-mediums">
+                      Bad Debt
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-mediums">
+                      Bad Debt Completed
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-mediums">
                       ...
                     </th>
                   </tr>
                 </thead>
 
                 <tbody className="divide-y divide-gray-200 text-gray-900">
-                  {customers.map((customer) => (
+                  {customers.map((customer: any) => (
                     <tr key={customer.id} className="group">
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
@@ -69,6 +81,30 @@ export default async function CustomersTable({
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
                           <p>{customer.passport}</p>
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-center gap-3">
+                          <p>{customer.normalStatusCounts}</p>
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-center gap-3">
+                          <p>{customer.completedStatusCounts}</p>
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-center gap-3">
+                          <p>{customer.badDebtStatusCounts}</p>
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-center gap-3">
+                          <p>{customer.badDebtCompletedStatusCounts}</p>
                         </div>
                       </td>
 

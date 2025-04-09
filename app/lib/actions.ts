@@ -125,6 +125,10 @@ interface CustomerFormData {
 	bank_details: CustomerBank[];
 	remarks?: CustomerRemark[];
 	document?: Record<string, any>[];
+	normalStatusCounts?: number | string;
+	completedStatusCounts?: number | string;
+	badDebtStatusCounts?: number | string;
+	badDebtCompletedStatusCounts?: number | string;
 }
 
 
@@ -245,6 +249,7 @@ export async function createCustomer(formData: CustomerFormData) {
 
 	const session = await auth()
 	console.log(session)
+	return;
 
 	try {
 		const customer = await prisma.customer.create({
